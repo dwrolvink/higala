@@ -4,16 +4,25 @@
       <img class="mr-3" :src="post.usr_image" style="max-height: 40px;">
         <h3 class="title font-weight-light"> {{ post.creator_name }} </h3>
         <v-spacer></v-spacer>
-        <v-btn flat icon small color="deep-purple lighten-2">
-            <v-icon>more_vert</v-icon>
-        </v-btn>
+        <v-tooltip bottom>
+          <v-btn 
+            flat 
+            icon 
+            small 
+            color="deep-purple lighten-2"
+            slot="activator"
+          >
+              <v-icon>more_vert</v-icon>
+          </v-btn>
+          <span>More options</span>
+        </v-tooltip>
         <br/>
     </v-card-title>
     <v-card-title>
       <p class="subheading">{{ post.content }}</p>
     </v-card-title>
     <v-card-actions>
-      <div class="ml-1 mt-1 grey--text">{{ post.likes }}</div>
+      <div class="ml-1 mt-1" :class="[postLiked? 'blue--text': 'grey--text']">{{ post.likes }}</div>
       <v-btn 
         icon 
         flat 
@@ -39,6 +48,7 @@ export default {
         postLiked: false,
         post: {
             creator_name: 'Zeth Leonardo',
+            username: 'X1Zeth2X',
             usr_image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Antu_distributor-logo-gentoo.svg/1024px-Antu_distributor-logo-gentoo.svg.png',
             content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc in sem quis dolor vulputate sollicitudin. Pellentesque eu felis nunc. Aenean bibendum risus tempor, posuere risus porttitor, facilisis metus. Proin blandit, turpis eget suscipit facilisis, mi lorem laoreet lorem, et placerat nibh velit ut tortor.',
             created: 'Aug 4th, 9:32 PM',

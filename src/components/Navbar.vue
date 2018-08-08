@@ -58,7 +58,6 @@ export default {
         title: 'Inspire'
       }],
       right: true,
-      title: 'Konishi'
     }
   }
 }

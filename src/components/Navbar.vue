@@ -48,6 +48,8 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
+
 export default {
   name: 'Navbar',
   data () {
@@ -59,6 +61,6 @@ export default {
       }],
       right: true,
     }
-  }
+  },
 }
 </script>

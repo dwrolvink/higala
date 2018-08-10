@@ -22,11 +22,11 @@
       <p class="subheading">{{ post.content }}</p>
     </v-card-title>
     <v-card-actions>
-      <div class="ml-1 mt-1" :class="[postLiked? 'blue--text': 'grey--text']">{{ post.likes }}</div>
+      <div class="ml-1 mt-1" :class="[postLiked? 'deep-purple--text ligten-2--text': 'grey--text']">{{ post.likes }}</div>
       <v-btn 
         icon 
         flat 
-        :color="[ postLiked? 'blue': 'grey']"
+        :color="[ postLiked? 'deep-purple lighten-2': 'grey']"
         @click="toggleLike"
       >
         <v-icon>thumb_up</v-icon>
@@ -41,19 +41,13 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
+
 export default {
   name: 'Post',
   data() {
     return {
         postLiked: false,
-        post: {
-            creator_name: 'Zeth Leonardo',
-            username: 'X1Zeth2X',
-            usr_image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Antu_distributor-logo-gentoo.svg/1024px-Antu_distributor-logo-gentoo.svg.png',
-            content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc in sem quis dolor vulputate sollicitudin. Pellentesque eu felis nunc. Aenean bibendum risus tempor, posuere risus porttitor, facilisis metus. Proin blandit, turpis eget suscipit facilisis, mi lorem laoreet lorem, et placerat nibh velit ut tortor.',
-            created: 'Aug 4th, 9:32 PM',
-            likes: 302,
-        }
     }
   },
   methods: {

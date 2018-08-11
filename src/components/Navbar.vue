@@ -1,5 +1,5 @@
 <template>
-  <v-navbar>
+  <div id="navbar">
     <v-navigation-drawer
       persistent
       :right="right"
@@ -44,23 +44,24 @@
     <v-content>
       <router-view/>
     </v-content>
-  </v-navbar>
+  </div>
 </template>
 
 <script>
-import { mapState } from 'vuex'
-
 export default {
-  name: 'Navbar',
-  data () {
+  name: "Navbar",
+  data() {
     return {
       drawer: false,
-      items: [{
-        icon: 'bubble_chart',
-        title: 'Inspire'
-      }],
-      right: true,
-    }
-  },
-}
+      clipped: false,
+      items: [
+        {
+          icon: "report_problem",
+          title: "Konishi (Testing)"
+        }
+      ],
+      right: true
+    };
+  }
+};
 </script>

@@ -5,7 +5,8 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    access_token: "",
+    backendUrl: "http://127.0.0.1:5000/",
+    loggedIn: false
   },
   getters: {},
   mutations: {},

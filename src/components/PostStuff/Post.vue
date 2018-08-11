@@ -1,7 +1,7 @@
 <template>
   <v-card class="mb-4 elevation-3">
     <v-card-title primary-title>
-      <img class="mr-3" :src="post.userProfilePic" style="max-height: 40px;">
+      <!-- Add profile pictures here later on -->
         <h3 class="title font-weight-light"> {{ post.creator_name }} </h3>
         <v-spacer></v-spacer>
         <v-tooltip bottom>
@@ -58,7 +58,7 @@ export default {
       postLiked: false,
     }
   },
-  mounted() {
+  created() {
     this.prettyTime()
     this.userLikes()
   },

@@ -9,20 +9,31 @@
       fixed
       app
     >
-      <v-list>
-        <v-list-tile
-          value="true"
-          v-for="(item, i) in items"
-          :key="i"
-        >
-          <v-list-tile-action>
-            <v-icon v-html="item.icon"></v-icon>
-          </v-list-tile-action>
-          <v-list-tile-content>
-            <v-list-tile-title v-text="item.title"></v-list-tile-title>
-          </v-list-tile-content>
-        </v-list-tile>
-      </v-list>
+      <v-toolbar flat>
+        <v-list>
+          <v-list-tile>
+            <v-list-tile-title class="title">
+              <v-icon v-html="status.icon" class="mr-1"></v-icon> {{ brandName }} {{ status.name }}
+            </v-list-tile-title>
+          </v-list-tile>
+        </v-list>
+      </v-toolbar>
+
+      <v-divider></v-divider>
+
+      <div v-if="loggedIn == true">
+        <v-list class="pt-0">
+          <v-list-tile @click="logout">
+            <v-list-tile-action>
+              <v-icon>exit_to_app</v-icon>
+            </v-list-tile-action>
+
+            <v-list-tile-content>
+              <v-list-tile-title>Logout</v-list-tile-title>
+            </v-list-tile-content>
+          </v-list-tile>
+        </v-list>
+      </div>
     </v-navigation-drawer>
     <v-toolbar
       app
@@ -48,20 +59,31 @@
 </template>
 
 <script>
+import { mapState } from "vuex";
+
 export default {
   name: "Navbar",
   data() {
     return {
       drawer: false,
       clipped: false,
-      items: [
-        {
-          icon: "report_problem",
-          title: "Konishi (Testing)"
-        }
-      ],
+      brandName: "Konishi",
+      status: {
+        name: "Testing",
+        icon: "report_problem"
+      },
       right: true
     };
+  },
+  computed: {
+    ...mapState(["loggedIn"])
+  },
+  methods: {
+    logout() {
+      localStorage.removeItem("access_token");
+      this.$store.state.loggedIn = false;
+      this.$router.push("login");
+    }
   }
 };
 </script>

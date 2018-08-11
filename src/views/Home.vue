@@ -1,14 +1,9 @@
 <template>
   <v-container grid-list-lg>
     <v-layout row wrap>
-      <v-flex xs3>
-        <v-card>
-          <v-card-title class="title font-weight-light">
-            Placeholder
-          </v-card-title>
-        </v-card>
+      <v-flex v-if="posts" xs3>
+        <CurrentUser/>
       </v-flex>
-
       <v-flex xs6>
         <div v-if="loading" align="center">
           <v-progress-circular
@@ -18,7 +13,10 @@
           >
         </v-progress-circular>
         </div>
-        <div v-else>
+        <div v-else-if="errors" v-for="(error, index) in errors" :key="index">
+          <v-alert :value="true" type="warning">{{ error }}</v-alert>
+        </div>
+        <div v-if="posts">
           <Create/>
           <div v-for="(post, index) in posts" :key="index">
             <Post :post="post"/>
@@ -35,6 +33,7 @@
 import axios from 'axios';
 import { mapState } from 'vuex'
 import Post from '@/components/PostStuff/Post.vue'
+import CurrentUser from '@/components/CurrentUser.vue'
 import Create from '@/components/PostStuff/Create.vue'
 
 export default {
@@ -47,23 +46,37 @@ export default {
     }
   },
   components: {
+    CurrentUser,
     Create,
     Post
   },
   created() {
     this.getPosts()
   },
+  computed: {
+    ...mapState([
+      "access_token"
+    ])
+  },
   methods: {
     getPosts() {
       this.error = this.posts = null
       this.loading = true
-      axios.get('http://127.0.0.1:5000/posts')
+      axios.get('http://127.0.0.1:5000/posts', {
+        headers: {
+          Authorization: "Bearer " + localStorage.access_token
+        }
+      })
       .then(response => {
         this.posts = response.data
         this.loading = false
         })
-      .catch(e => {
-        this.errors.push(e);
+      .catch(error => {
+        if (error.status == 500) {
+          this.$router.push('/login')
+          this.errors = error
+          this.loading = false
+        }
       });
     }
   }

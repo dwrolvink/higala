@@ -1,19 +1,20 @@
 <template>
   <v-container grid-list-lg>
+    <div v-if="loading" align="center">
+      <v-progress-circular
+      :size="50"
+      color="deep-purple lighten-1"
+      indeterminate
+      >
+    </v-progress-circular>
+    </div>
     <v-layout row wrap>
       <v-flex v-if="posts" xs3>
         <CurrentUser/>
       </v-flex>
+
       <v-flex xs6>
-        <div v-if="loading" align="center">
-          <v-progress-circular
-          :size="50"
-          color="deep-purple lighten-1"
-          indeterminate
-          >
-        </v-progress-circular>
-        </div>
-        <div v-else-if="errors" v-for="(error, index) in errors" :key="index">
+        <div v-if="errors" v-for="(error, index) in errors" :key="index">
           <v-alert :value="true" type="warning">{{ error }}</v-alert>
         </div>
         <div v-if="posts">
@@ -62,22 +63,28 @@ export default {
     getPosts() {
       this.error = this.posts = null
       this.loading = true
-      axios.get('http://127.0.0.1:5000/posts', {
-        headers: {
-          Authorization: "Bearer " + localStorage.access_token
-        }
-      })
-      .then(response => {
-        this.posts = response.data
-        this.loading = false
+      if (localStorage.getItem("access_token") === null){
+        this.$router.push("/login")
+      } else {
+        var access_token = localStorage.access_token
+        axios.get('http://127.0.0.1:5000/posts', {
+          headers: {
+            Authorization: "Bearer " + access_token
+          }
         })
-      .catch(error => {
-        if (error.status == 500) {
-          this.$router.push('/login')
-          this.errors = error
+        .then(response => {
+          this.posts = response.data
           this.loading = false
-        }
-      });
+          })
+        .catch(error => {
+          var status = error.response.status
+          if (status === 500) {
+            this.$router.push('/login')
+            this.errors = error
+            this.loading = false
+          }
+        });
+      }
     }
   }
 };

@@ -106,7 +106,7 @@
                       <v-flex xs6>
                         <v-text-field
                           label="Last Name"
-                          prepend-icon="translate"
+                          prepend-icon="text_rotation_none"
                           required
                           v-model="lastName"
                           :rules="nameRules"
@@ -261,7 +261,20 @@ export default {
               if (response.data.success === true) {
                 this.snackbar = true;
                 this.snackbarColor = "success";
-                this.$router.push("/login");
+                this.text = "You are now signed up";
+              }
+            })
+            .catch(error => {
+              var reason = error.response.data.reason;
+              var status = error.response.status;
+              if (reason === "email" && status === 403) {
+                this.snackbar = true;
+                this.snackbarColor = "red lighten-1";
+                this.text = "This email is used on another account";
+              } else if (reason === "username" && status === 403) {
+                this.snackbar = true;
+                this.snackbarColor = "red lighten-1";
+                this.text = "This username has already been taken";
               }
             });
         }

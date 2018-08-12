@@ -122,7 +122,6 @@ export default {
             if (response.data.success == true) {
               localStorage.access_token = response.data.access_token;
               // Redirect user to Home page.
-              this.$store.state.loggedIn = true;
               this.$router.push({ name: "home" });
             }
           })

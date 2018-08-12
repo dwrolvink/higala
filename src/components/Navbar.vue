@@ -21,7 +21,30 @@
 
       <v-divider></v-divider>
 
-      <div v-if="loggedIn == true">
+      <v-list class="pt-0">
+        <v-list-tile @click="github">
+          <v-list-tile-action>
+            <v-icon>stars</v-icon>
+          </v-list-tile-action>
+
+          <v-list-tile-content>
+            <v-list-tile-title>Project GitHub</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+      </v-list>
+      <v-list class="pt-0">
+        <v-list-tile @click="github">
+          <v-list-tile-action>
+            <v-icon>code</v-icon>
+          </v-list-tile-action>
+
+          <v-list-tile-content>
+            <v-list-tile-title>Some Link</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+      </v-list>
+
+      <div v-if="loggedIn === true">
         <v-list class="pt-0">
           <v-list-tile @click="logout">
             <v-list-tile-action>
@@ -67,6 +90,7 @@ export default {
     return {
       drawer: false,
       clipped: false,
+      loggedIn: null,
       brandName: "Konishi",
       status: {
         name: "Testing",
@@ -75,14 +99,24 @@ export default {
       right: true
     };
   },
+  created() {
+    this.checkLogin();
+  },
   computed: {
     ...mapState(["loggedIn"])
   },
   methods: {
     logout() {
       localStorage.removeItem("access_token");
-      this.$store.state.loggedIn = false;
       this.$router.push("login");
+    },
+    checkLogin() {
+      if (localStorage.access_token != null) {
+        this.loggedIn = true;
+      }
+    },
+    github() {
+      window.open("https://github.com/konishi-project/", "_blank");
     }
   }
 };

@@ -6,7 +6,6 @@
           <v-snackbar
             v-model="snackbar"
             top
-            timeout="5000"
             :color="color"
           >
           {{ text }}
@@ -28,6 +27,7 @@
                       prepend-icon="person"
                       required
                       v-model="username"
+                      @keyup.enter="login"
                       :rules="usernameRules"
                     >
                     </v-text-field>
@@ -43,6 +43,7 @@
                       hint="At least 8 characters"
                       class="input-group--focused"
                       @click:append="showPassword = !showPassword"
+                      @keyup.enter="login"
                       required
                     ></v-text-field>
                   </v-flex>
@@ -53,6 +54,7 @@
                   <v-flex xs6>
                     <v-btn 
                       flat 
+                      block
                       color="deep-purple"
                       :disabled="!valid"
                       @click="login"
@@ -62,8 +64,7 @@
                     </v-btn>
                   </v-flex>
                   <v-flex xs6>
-                    <v-btn flat color="green lighten-1">SignUp</v-btn>
-                    <v-btn flat color="red accent-1">Forgot Password?</v-btn>
+                    <v-btn flat block color="green lighten-1" @click="signup">SignUp</v-btn>
                   </v-flex>
                 </v-layout>
               </v-card-actions>
@@ -111,11 +112,7 @@ export default {
   },
   methods: {
     login() {
-      if (this.username == null || this.password == null) {
-        this.snackbar = true;
-        this.text = "The fields are empty, fill those up.";
-        this.color = "amber darken-2";
-      } else {
+      if (this.$refs.loginForm.validate()) {
         axios
           .post(this.backendUrl + "login", {
             username: this.username,
@@ -130,9 +127,14 @@ export default {
             }
           })
           .catch(error => {
-            if (error.status == 404) {
+            var status = error.response.status;
+            if (status === 401) {
               this.snackbar = true;
               this.text = "Incorrect username or password";
+              this.color = "red lighten-2";
+            } else if (status === 404) {
+              this.snackbar = true;
+              this.text = "Uh oh! User not found";
               this.color = "red lighten-2";
             }
           });
@@ -142,6 +144,9 @@ export default {
       if (localStorage.access_token != null) {
         this.$router.push("/");
       }
+    },
+    signup() {
+      this.$router.push("/signup");
     }
   }
 };

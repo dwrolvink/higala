@@ -82,6 +82,8 @@ export default {
             this.$router.push('/login')
             this.errors = error
             this.loading = false
+          } else if (status === 429) {
+            alert("Get a life.");
           }
         });
       }

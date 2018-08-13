@@ -7,7 +7,7 @@
         primary-title
         ><v-icon class="mr-1">edit</v-icon> Create a post
         </v-card-title>
-        <v-card-title>
+        <v-card-text>
           <v-layout row wrap>
             <v-flex xs12>
               <v-textarea
@@ -23,7 +23,7 @@
               </v-textarea>
             </v-flex>
           </v-layout>
-        </v-card-title>
+        </v-card-text>
         <v-card-actions>
           <v-btn 
           block 
@@ -50,6 +50,7 @@
 
 <script>
 import axios from "axios";
+import { mapState } from "vuex";
 
 export default {
   name: "CreatePost",
@@ -57,8 +58,13 @@ export default {
     return {
       valid: true,
       postContent: "",
+      snackbar: false,
+      text: "",
       errors: null
     };
+  },
+  computed: {
+    ...mapState(["backendUrl"])
   },
   methods: {
     clear() {
@@ -66,18 +72,27 @@ export default {
     },
     submit() {
       if (this.$refs.createForm.validate()) {
-        axios.post(
-          "http://127.0.0.1:5000/posts",
-          {
-            content: this.postContent,
-            image_id: null
-          },
-          {
-            headers: { Authorization: "Bearer " + localStorage.access_token }
-          }
-        );
+        axios
+          .post(
+            this.backendUrl + "posts",
+            {
+              content: this.postContent,
+              image_id: null
+            },
+            {
+              headers: {
+                Authorization: "Bearer " + localStorage.access_token
+              }
+            }
+          )
+          .then(response => {
+            if (response.data.success === true) {
+              this.$refs.createForm.reset();
+              this.$emit("postCreated");
+            }
+          });
       }
-    }
+    } // Submit end
   }
 };
 </script>

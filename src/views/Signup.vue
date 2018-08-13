@@ -13,6 +13,17 @@
         @click="snackbar = false"
       >Close</v-btn>
       </v-snackbar>
+      <v-snackbar
+        v-model="successBar"
+        top
+        :color="snackbarColor"
+      >
+      {{ text }}
+      <v-btn
+        flat
+        @click="goToLogin"
+      >Login</v-btn>
+      </v-snackbar>
       <v-layout row wrap>
         <v-flex xs6>
           <v-container>
@@ -30,7 +41,7 @@
                       <i class="fas fa-hand-holding-usd" style="font-size: 5rem;"></i>
                     </v-flex>
                     <v-flex xs9>
-                      <p class="text-xs-center title font-weight-medium font-italic">It's Free!</p>
+                      <p class="text-xs-center title font-weight-medium">It's Free!</p>
                       <p class="text-xs-center subheading font-weight-light">
                         You don't need to pay a single dime to use Konishi and will stay that way, it is 
                         also free as in freedom!
@@ -40,7 +51,7 @@
                       <i class="fas fa-file-code" style="font-size: 5rem;"></i>
                     </v-flex>
                     <v-flex xs9>
-                      <p class="text-xs-center title font-weight-medium font-italic">Open Sauce</p>
+                      <p class="text-xs-center title font-weight-medium">Open Sauce!</p>
                       <p class="text-xs-center subheading font-weight-light">
                         The code is free to snag and use without having to be limited by rules!
                         It is licensed in GNU's GPL
@@ -50,7 +61,7 @@
                       <i class="fas fa-user-secret" style="font-size: 5rem;"></i>
                     </v-flex>
                     <v-flex xs9>
-                      <p class="text-xs-center title font-weight-medium font-italic">Privacy</p>
+                      <p class="text-xs-center title font-weight-medium">Privacy!</p>
                       <p class="text-xs-center subheading font-weight-light">
                         Unlike other social media, we are a non-profit group and do not
                         sell your data
@@ -106,7 +117,7 @@
                       <v-flex xs6>
                         <v-text-field
                           label="Last Name"
-                          prepend-icon="text_rotation_none"
+                          prepend-icon="sort_by_alpha"
                           required
                           v-model="lastName"
                           :rules="nameRules"
@@ -158,14 +169,14 @@
                     color="pink lighten-2"
                     @click="goToLogin"
                   >
-                    Already have an account?
+                  I have an account
                   </v-btn>
                   <v-btn 
                     block 
                     flat
                     color="cyan"
                     :disabled="!valid"
-                    @click="submit"
+                    @click="testSign"
                   >
                     <v-icon class="mr-2">send</v-icon>
                     Join
@@ -179,8 +190,7 @@
                 class="title"
               >
               <v-icon class="mr-2">vpn_key</v-icon> 
-              Entry key is 
-              <i class="font-weight-bold green--text">"KonishiTesting"</i>
+              Entry key is "KonishiTesting"
               </v-card-title>
             </v-card>
           </v-container>
@@ -200,6 +210,7 @@ export default {
     return {
       valid: true,
       snackbar: false,
+      successBar: false,
       snackbarColor: "",
       text: "",
       email: "",
@@ -259,9 +270,10 @@ export default {
             })
             .then(response => {
               if (response.data.success === true) {
-                this.snackbar = true;
+                this.$refs.form.reset();
+                this.successBar = true;
                 this.snackbarColor = "success";
-                this.text = "You are now signed up";
+                this.text = "You are now signed up, click login to continue";
               }
             })
             .catch(error => {
@@ -275,11 +287,15 @@ export default {
                 this.snackbar = true;
                 this.snackbarColor = "red lighten-1";
                 this.text = "This username has already been taken";
+              } else if (reason === "key" && status === 406) {
+                this.snackbar = true;
+                this.snackbarColor = "red lighten-1";
+                this.text = "Please provide a proper entry key";
               }
             });
         }
       }
-    }
+    } // Submit End
   }
 };
 </script>

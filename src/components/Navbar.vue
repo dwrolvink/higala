@@ -43,20 +43,6 @@
           </v-list-tile-content>
         </v-list-tile>
       </v-list>
-
-      <div v-if="loggedIn === true">
-        <v-list class="pt-0">
-          <v-list-tile @click="logout">
-            <v-list-tile-action>
-              <v-icon>exit_to_app</v-icon>
-            </v-list-tile-action>
-
-            <v-list-tile-content>
-              <v-list-tile-title>Logout</v-list-tile-title>
-            </v-list-tile-content>
-          </v-list-tile>
-        </v-list>
-      </div>
     </v-navigation-drawer>
     <v-toolbar
       app
@@ -65,10 +51,46 @@
       dark
     >
     <router-link to="/">
-      <v-toolbar-title>
-          <img src="@/assets/Logos/Brand.png" alt="" height="40"> 
+      <v-toolbar-title class="mt-1">
+          <img src="@/assets/Logos/Brand.png" alt="" height="35"> 
       </v-toolbar-title>
     </router-link>
+
+    <v-dialog
+      v-model="dialog"
+      width="500"
+    >
+      <v-btn
+        slot="activator"
+        class="ml-2"
+        dark
+        icon
+      >
+      <v-icon>info</v-icon>
+      </v-btn>
+      <v-card>
+        <v-card-title
+          class="headline grey lighten-2"
+          primary-title
+        >
+          Info
+        </v-card-title>
+        <v-card-text>
+          {{ dialogText }}
+        </v-card-text>
+        <v-divider></v-divider>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="primary"
+            flat
+            @click="dialog = false"
+          >
+            Got it!
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
       <v-spacer></v-spacer>
       <v-btn icon @click.stop="drawer = !drawer">
@@ -82,15 +104,15 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
-
 export default {
   name: "Navbar",
   data() {
     return {
       drawer: false,
       clipped: false,
-      loggedIn: null,
+      dialog: false,
+      dialogText:
+        "This is Konishi's web client, it is not expected to be fully responsive on mobile and is also a testing build so it may have a lot of bugs and break, if you encounter any please create a github issue and explain it.",
       brandName: "Konishi",
       status: {
         name: "Testing",
@@ -99,22 +121,7 @@ export default {
       right: true
     };
   },
-  created() {
-    this.checkLogin();
-  },
-  computed: {
-    ...mapState(["loggedIn"])
-  },
   methods: {
-    logout() {
-      localStorage.removeItem("access_token");
-      this.$router.push("login");
-    },
-    checkLogin() {
-      if (localStorage.access_token != null) {
-        this.loggedIn = true;
-      }
-    },
     github() {
       window.open("https://github.com/konishi-project/", "_blank");
     }

@@ -64,7 +64,10 @@
                     </v-btn>
                   </v-flex>
                   <v-flex xs6>
-                    <v-btn flat block color="green lighten-1" @click="signup">SignUp</v-btn>
+                    <v-btn flat block color="green lighten-1" @click="signup">
+                      <v-icon class="mr-1">beenhere</v-icon>
+                      signup
+                    </v-btn>
                   </v-flex>
                 </v-layout>
               </v-card-actions>
@@ -133,7 +136,7 @@ export default {
               this.color = "red lighten-2";
             } else if (status === 404) {
               this.snackbar = true;
-              this.text = "Uh oh! User not found";
+              this.text = "Uh oh! 404 User Not Found";
               this.color = "red lighten-2";
             }
           });

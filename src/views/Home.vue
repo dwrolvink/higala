@@ -1,28 +1,31 @@
 <template>
   <v-container grid-list-lg>
-    <div v-if="loading" align="center">
-      <v-progress-circular
-      :size="50"
-      color="deep-purple lighten-1"
-      indeterminate
-      >
-    </v-progress-circular>
-    </div>
+    <v-snackbar v-model="snackbar" top :color="snackbarColor">
+    {{ text }}
+    <v-btn flat @click="snackbar = false">Close</v-btn>
+    </v-snackbar>
     <v-layout row wrap>
-      <v-flex v-if="posts" xs3>
+      <v-flex xs3>
         <CurrentUser/>
       </v-flex>
 
       <v-flex xs6>
-        <div v-if="errors" v-for="(error, index) in errors" :key="index">
-          <v-alert :value="true" type="warning">{{ error }}</v-alert>
-        </div>
+        <Create v-on:postCreated="updateFeed"/>
         <div v-if="posts">
-          <Create/>
           <div v-for="(post, index) in posts" :key="index">
             <Post :post="post"/>
           </div>
         </div>
+        <div v-else align="center" class="mt-5">
+          <p class="mr-2 display-1">Loading posts</p>
+          <v-progress-circular
+          :size="40"
+          color="deep-purple lighten-1"
+          indeterminate
+          >
+          </v-progress-circular>
+        </div>
+
       </v-flex>
     </v-layout>
   </v-container>
@@ -43,7 +46,10 @@ export default {
     return {
       posts: null,
       errors: null,
-      loading: false
+      loading: false,
+      snackbar: false,
+      snackbarColor: "",
+      text: ""
     }
   },
   components: {
@@ -56,9 +62,9 @@ export default {
   },
   computed: {
     ...mapState([
-      "access_token"
+      "backendUrl"
     ])
-  },
+  },                              
   methods: {
     getPosts() {
       this.error = this.posts = null
@@ -67,7 +73,7 @@ export default {
         this.$router.push("/login")
       } else {
         var access_token = localStorage.access_token
-        axios.get('http://127.0.0.1:5000/posts', {
+        axios.get(this.backendUrl + "posts", {
           headers: {
             Authorization: "Bearer " + access_token
           }
@@ -80,13 +86,19 @@ export default {
           var status = error.response.status
           if (status === 500) {
             this.$router.push('/login')
-            this.errors = error
-            this.loading = false
-          } else if (status === 429) {
-            alert("Get a life.");
+          } else {
+            this.snackbar = true;
+            this.text = "Something went wrong";
+            this.snackbarColor = "red lighten-2";
           }
         });
       }
+    }, // Get Posts end
+      updateFeed() {
+      this.getPosts()
+      this.snackbar = true;
+      this.text = "Post has successfully been created";
+      this.snackbarColor = "success";
     }
   }
 };

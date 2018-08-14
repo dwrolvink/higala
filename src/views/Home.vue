@@ -13,7 +13,11 @@
         <Create v-on:postCreated="updateFeed"/>
         <div v-if="posts">
           <div v-for="(post, index) in posts" :key="index">
-            <Post :post="post"/>
+            <Post 
+              :post="post" 
+              v-on:postDeleted="removePost"
+              v-on:notPostOwner="falseOwner"
+            />
           </div>
         </div>
         <div v-else align="center" class="mt-5">
@@ -99,6 +103,19 @@ export default {
       this.snackbar = true;
       this.text = "Post has successfully been created";
       this.snackbarColor = "success";
+    },
+    removePost(postId) {
+      // Get item index
+      var index = this.posts.findIndex(post => post.id === postId);
+      this.posts.splice(index, 1);
+      this.snackbar = true;
+      this.text = "Post has been deleted!";
+      this.snackbarColor = "success";
+    },
+    falseOwner() {
+      this.snackbar = true;
+      this.text = "You do not own this post!";
+      this.snackbarColor = "red lighten-2";
     }
   }
 };

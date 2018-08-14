@@ -176,7 +176,7 @@
                     flat
                     color="cyan"
                     :disabled="!valid"
-                    @click="testSign"
+                    @click="submit"
                   >
                     <v-icon class="mr-2">send</v-icon>
                     Join

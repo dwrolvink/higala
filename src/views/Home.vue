@@ -17,6 +17,7 @@
               :post="post" 
               v-on:postDeleted="removePost"
               v-on:notPostOwner="falseOwner"
+              v-on:somethingWentWrong="somethingWentWrong"
             />
           </div>
         </div>
@@ -115,6 +116,11 @@ export default {
     falseOwner() {
       this.snackbar = true;
       this.text = "You do not own this post!";
+      this.snackbarColor = "red lighten-2";
+    },
+    somethingWentWrong() {
+      this.snackbar = true;
+      this.text = "Something went wrong during the process"
       this.snackbarColor = "red lighten-2";
     }
   }

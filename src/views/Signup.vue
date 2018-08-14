@@ -54,7 +54,7 @@
                       <p class="text-xs-center title font-weight-medium">Open Sauce!</p>
                       <p class="text-xs-center subheading font-weight-light">
                         The code is free to snag and use without having to be limited by rules!
-                        It is licensed in GNU's GPL
+                        It is licensed in GNU's GPL v3
                       </p>
                     </v-flex>
                     <v-flex xs3>
@@ -63,8 +63,8 @@
                     <v-flex xs9>
                       <p class="text-xs-center title font-weight-medium">Privacy!</p>
                       <p class="text-xs-center subheading font-weight-light">
-                        Unlike other social media, we are a non-profit group and do not
-                        sell your data
+                        Unlike other social media, we don't sell or maliciously use your
+                        data without permission.
                       </p>
                     </v-flex>
                   </v-layout>

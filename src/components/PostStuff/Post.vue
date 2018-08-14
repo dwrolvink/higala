@@ -4,7 +4,12 @@
       <!-- Add profile pictures here later on -->
         <h3 class="title font-weight-light"> {{ post.creator_name }} </h3>
         <v-spacer></v-spacer>
-        <v-tooltip bottom>
+        <v-menu
+          bottom
+          right
+          lazy
+          transition="slide-y-transition"
+        >
           <v-btn 
             flat 
             icon 
@@ -12,10 +17,17 @@
             color="deep-purple lighten-2"
             slot="activator"
           >
-              <v-icon>more_vert</v-icon>
+            <v-icon>more_vert</v-icon>
           </v-btn>
-          <span>More options</span>
-        </v-tooltip>
+
+          <div v-show="owner">
+            <v-list>
+              <v-list-tile @click="deletePost">
+                <v-list-tile-title>Delete post</v-list-tile-title>
+              </v-list-tile>
+            </v-list>
+          </div>
+        </v-menu>
         <br/>
     </v-card-title>
     <v-card-title>
@@ -32,7 +44,7 @@
         icon 
         flat 
         :color="[ postLiked? 'deep-purple lighten-2': 'grey']"
-        @click="toggleLike"
+        v-on="{click: postLiked? unlikePost: likePost}"
       >
         <v-icon>thumb_up</v-icon>
       </v-btn>
@@ -46,38 +58,113 @@
 </template>
 
 <script>
-/* eslint-disable */
-import moment from 'moment';
-import { mapState } from 'vuex';
+import axios from "axios";
+import moment from "moment";
+import { mapState } from "vuex";
 
 export default {
-  name: 'Post',
-  props: ['post'],
+  name: "Post",
+  props: ["post"],
   data() {
     return {
-      postLiked: false,
-    }
+      postLiked: null,
+      owner: false
+    };
   },
   created() {
-    this.prettyTime()
-    this.userLikes()
+    this.checkLike();
+    this.prettyTime();
+    this.userLikes();
+  },
+  mounted() {
+    this.checkOwner();
+  },
+  computed: {
+    ...mapState(["backendUrl"])
   },
   methods: {
-    toggleLike() {
-      this.postLiked = !this.postLiked
-      if(this.postLiked == true) {
-        this.post.likes = this.post.likes + 1
-      } else {
-        this.post.likes = this.post.likes - 1
-      }
+    likePost() {
+      axios
+        .post(this.backendUrl + "post/" + this.post.id + "/like", null, {
+          headers: {
+            Authorization: "Bearer " + localStorage.access_token
+          }
+        })
+        .then(response => {
+          if (response.status === 201) {
+            this.post.likes = this.post.likes + 1;
+            this.postLiked = true;
+          }
+        })
+        .catch(error => {
+          if (error.response.status === 500) {
+            this.$emit("somethingWentWrong");
+          }
+        });
+    },
+    unlikePost() {
+      axios
+        .delete(this.backendUrl + "post/" + this.post.id + "/like", {
+          headers: {
+            Authorization: "Bearer " + localStorage.access_token
+          }
+        })
+        .then(response => {
+          if (response.status === 200) {
+            this.postLiked = false;
+            this.post.likes = this.post.likes - 1;
+          }
+        });
+    },
+    checkLike() {
+      axios
+        .get(this.backendUrl + "post/" + this.post.id + "/like", {
+          headers: {
+            Authorization: "Bearer " + localStorage.access_token
+          }
+        })
+        .then(response => {
+          if (response.status === 200) {
+            this.postLiked = true;
+          }
+        })
+        .catch(error => {
+          if (error.response.status === 404) {
+            this.postLiked = false;
+          }
+        });
+    },
+    deletePost() {
+      axios
+        .delete(this.backendUrl + "post/" + this.post.id, {
+          headers: {
+            Authorization: "Bearer " + localStorage.access_token
+          }
+        })
+        .then(response => {
+          if (response.status === 200) {
+            this.$emit("postDeleted", this.post.id);
+          }
+        })
+        .catch(error => {
+          var status = error.response.status;
+          if (status === 403) {
+            this.$emit("notPostOwner");
+          }
+        });
     },
     prettyTime() {
-      var createdDate = moment(this.post.created).format("MMM Do, h:MM A")
-      this.post.created = createdDate
+      var createdDate = moment(this.post.created).format("MMM Do, h:MM A");
+      this.post.created = createdDate;
     },
     userLikes() {
-      var likes = (this.post.likes).length
-      this.post.likes = likes
+      var likes = this.post.likes.length;
+      this.post.likes = likes;
+    },
+    checkOwner() {
+      if (this.post.creator_name === localStorage.currentUsername) {
+        this.owner = true;
+      }
     }
   }
 };

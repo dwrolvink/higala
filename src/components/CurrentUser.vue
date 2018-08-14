@@ -1,6 +1,6 @@
 <template>
   <div id="currentuser">
-    <v-card dark color="indigo lighten-2">
+    <v-card dark color="indigo lighten-2" class="elevation-5">
       <div v-if="ready">
         <v-card-title
         primary-title
@@ -70,6 +70,7 @@
 <script>
 import axios from "axios";
 import moment from "moment";
+import { mapState } from "vuex";
 
 export default {
   name: "CurrentUser",
@@ -78,7 +79,7 @@ export default {
       currentUser: "",
       role: "",
       joinedDate: "",
-      ready: false,
+      ready: null,
       dialog: false
     };
   },
@@ -86,18 +87,25 @@ export default {
     this.getuserInfo();
     this.prettyJoin();
   },
+  computed: {
+    ...mapState(["backendUrl"])
+  },
   methods: {
     getuserInfo() {
       axios
-        .get("http://127.0.0.1:5000/currentuser", {
+        .get(this.backendUrl + "currentuser", {
           headers: {
             Authorization: "Bearer " + localStorage.access_token
           }
         })
         .then(response => {
           this.currentUser = response.data;
+          // Store current username
+          localStorage.currentUsername = response.data.username;
           if (this.currentUser.roles[0] == 1) {
             this.role = "Admin";
+            this.ready = true;
+          } else {
             this.ready = true;
           }
         });

@@ -1,6 +1,6 @@
 <template>
   <div id="create" class="mb-4">
-    <v-card>
+    <v-card class="elevation-5">
       <v-form ref="createForm" v-model="valid" lazy-validation>
         <v-card-title
         class="title font-weight-light"

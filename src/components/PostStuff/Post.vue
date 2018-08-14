@@ -60,27 +60,24 @@
 <script>
 import axios from "axios";
 import moment from "moment";
-import { mapState } from "vuex";
 
 export default {
   name: "Post",
   props: ["post"],
   data() {
     return {
+      backendUrl: "http://localhost:4000/",
       postLiked: null,
       owner: false
     };
   },
   created() {
-    this.checkLike();
     this.prettyTime();
     this.userLikes();
   },
   mounted() {
+    this.checkLike();
     this.checkOwner();
-  },
-  computed: {
-    ...mapState(["backendUrl"])
   },
   methods: {
     likePost() {

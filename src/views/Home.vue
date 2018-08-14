@@ -49,12 +49,13 @@ export default {
   name: 'Home',
   data() {
     return {
+      backendUrl: "http://localhost:4000/",
       posts: null,
       errors: null,
       loading: false,
       snackbar: false,
       snackbarColor: "",
-      text: ""
+      text: "",
     }
   },
   components: {
@@ -65,11 +66,6 @@ export default {
   created() {
     this.getPosts()
   },
-  computed: {
-    ...mapState([
-      "backendUrl"
-    ])
-  },                              
   methods: {
     getPosts() {
       this.error = this.posts = null

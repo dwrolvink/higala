@@ -50,21 +50,18 @@
 
 <script>
 import axios from "axios";
-import { mapState } from "vuex";
 
 export default {
   name: "CreatePost",
   data() {
     return {
       valid: true,
+      backendUrl: "http://localhost:4000/",
       postContent: "",
       snackbar: false,
       text: "",
       errors: null
     };
-  },
-  computed: {
-    ...mapState(["backendUrl"])
   },
   methods: {
     clear() {

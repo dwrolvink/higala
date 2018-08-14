@@ -87,6 +87,7 @@ export default {
   name: "Login",
   data() {
     return {
+      backendUrl: "http://localhost:4000/",
       showPassword: false,
       valid: true,
       snackbar: false,
@@ -106,9 +107,6 @@ export default {
           "Password must be atleast 8 characters or more"
       ]
     };
-  },
-  computed: {
-    ...mapState(["backendUrl"])
   },
   mounted() {
     this.checkLogin();

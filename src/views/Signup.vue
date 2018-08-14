@@ -64,7 +64,8 @@
                       <p class="text-xs-center title font-weight-medium">Privacy!</p>
                       <p class="text-xs-center subheading font-weight-light">
                         Unlike other social media, we don't sell or maliciously use your
-                        data without permission.
+                        data without permission. We're a very passionate group and mainly do this for fun
+                        and to help others.
                       </p>
                     </v-flex>
                   </v-layout>
@@ -208,6 +209,7 @@ export default {
   name: "Signup",
   data() {
     return {
+      backendUrl: "http://localhost:4000/",
       valid: true,
       snackbar: false,
       successBar: false,
@@ -243,9 +245,6 @@ export default {
       entryKey: ""
     };
   }, // Data end
-  computed: {
-    ...mapState(["backendUrl"])
-  },
   methods: {
     goToLogin() {
       this.$router.push("/login");

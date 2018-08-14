@@ -70,12 +70,12 @@
 <script>
 import axios from "axios";
 import moment from "moment";
-import { mapState } from "vuex";
 
 export default {
   name: "CurrentUser",
   data() {
     return {
+      backendUrl: "http://localhost:4000/",
       currentUser: "",
       role: "",
       joinedDate: "",
@@ -86,9 +86,6 @@ export default {
   created() {
     this.getuserInfo();
     this.prettyJoin();
-  },
-  computed: {
-    ...mapState(["backendUrl"])
   },
   methods: {
     getuserInfo() {

@@ -4,12 +4,28 @@
       <!-- Add profile pictures here later on -->
         <h3 class="title font-weight-light"> {{ post.creator_name }} </h3>
         <v-spacer></v-spacer>
+
+        <v-tooltip bottom>
+          <v-btn 
+            flat 
+            icon 
+            small 
+            color="deep-purple lighten-2"
+            slot="activator"
+            @click="normalView = !normalView"
+          >
+            <v-icon>code</v-icon>
+          </v-btn>
+          <span>Code view</span>
+        </v-tooltip>
+
         <v-menu
           bottom
           right
           lazy
           transition="slide-y-transition"
         >
+
           <v-btn 
             flat 
             icon 
@@ -30,21 +46,35 @@
         </v-menu>
         <br/>
     </v-card-title>
-    <v-card-title>
-      <p class="subheading">{{ post.content }}</p>
-    </v-card-title>
+    <v-card-text>
+      <div v-if="normalView">
+        <read-more
+          more-str="Read more"
+          less-str="Read less"
+          class="subheading"
+          :text="post.content"
+          :max-chars="477"
+          link="#"
+        >
+        </read-more>
+      </div>
+      <div v-else>
+        <vue-simple-markdown :source="post.content"></vue-simple-markdown>
+      </div>
+
+    </v-card-text>
     <v-card-actions>
       <div 
       class="ml-1 mt-1" 
       :class="[postLiked? 'deep-purple--text ligten-2--text': 'grey--text']"
       >
-      {{ post.likes }}
+      {{ amountOfLikes }}
       </div>
       <v-btn 
         icon 
         flat 
-        :color="[ postLiked? 'deep-purple lighten-2': 'grey']"
-        v-on="{click: postLiked? unlikePost: likePost}"
+        :color="postLiked? 'deep-purple lighten-2': 'grey'"
+        @click="toggleLike"
       >
         <v-icon>thumb_up</v-icon>
       </v-btn>
@@ -52,7 +82,7 @@
         <v-icon>forum</v-icon>
       </v-btn>
       <v-spacer></v-spacer>
-      <h3 class="subheading font-weight-light"> {{ post.created }} </h3>
+      <h3 class="subheading font-weight-light"> {{ prettyDate }} </h3>
     </v-card-actions>
   </v-card>
 </template>
@@ -63,74 +93,67 @@ import moment from "moment";
 
 export default {
   name: "Post",
-  props: ["post"],
+  props: ["post", "userLikes"],
   data() {
     return {
       backendUrl: "http://localhost:4000/",
-      postLiked: null,
-      owner: false
+      normalView: true,
+      postLiked: false,
+      postTruncateLimit: 477,
+      owner: false,
+      prettyDate: null,
+      amountOfLikes: 0
     };
   },
   created() {
     this.prettyTime();
-    this.userLikes();
+    this.likeAmount();
   },
   mounted() {
-    this.checkLike();
     this.checkOwner();
   },
   methods: {
-    likePost() {
-      axios
-        .post(this.backendUrl + "post/" + this.post.id + "/like", null, {
-          headers: {
-            Authorization: "Bearer " + localStorage.access_token
-          }
-        })
-        .then(response => {
-          if (response.status === 201) {
-            this.post.likes = this.post.likes + 1;
-            this.postLiked = true;
-          }
-        })
-        .catch(error => {
-          if (error.response.status === 500) {
-            this.$emit("somethingWentWrong");
-          }
-        });
+    toggleLike() {
+      this.postLiked = !this.postLiked;
+      if (this.postLiked === true) {
+        this.amountOfLikes = this.amountOfLikes + 1;
+      } else {
+        this.amountOfLikes = this.amountOfLikes - 1;
+      }
     },
-    unlikePost() {
-      axios
-        .delete(this.backendUrl + "post/" + this.post.id + "/like", {
-          headers: {
-            Authorization: "Bearer " + localStorage.access_token
-          }
-        })
-        .then(response => {
-          if (response.status === 200) {
-            this.postLiked = false;
-            this.post.likes = this.post.likes - 1;
-          }
-        });
-    },
-    checkLike() {
-      axios
-        .get(this.backendUrl + "post/" + this.post.id + "/like", {
-          headers: {
-            Authorization: "Bearer " + localStorage.access_token
-          }
-        })
-        .then(response => {
-          if (response.status === 200) {
-            this.postLiked = true;
-          }
-        })
-        .catch(error => {
-          if (error.response.status === 404) {
-            this.postLiked = false;
-          }
-        });
-    },
+    // likePost() {
+    //   axios
+    //     .post(this.backendUrl + "post/" + this.post.id + "/like", null, {
+    //       headers: {
+    //         Authorization: "Bearer " + localStorage.access_token
+    //       }
+    //     })
+    //     .then(response => {
+    //       if (response.status === 201) {
+    //         amountOfLikes = amountOfLikes++;
+    //         this.postLiked = true;
+    //       }
+    //     })
+    //     .catch(error => {
+    //       if (error.response.status === 500) {
+    //         this.$emit("somethingWentWrong");
+    //       }
+    //     });
+    // },
+    // unlikePost() {
+    //   axios
+    //     .delete(this.backendUrl + "post/" + this.post.id + "/like", {
+    //       headers: {
+    //         Authorization: "Bearer " + localStorage.access_token
+    //       }
+    //     })
+    //     .then(response => {
+    //       if (response.status === 200) {
+    //         this.postLiked = false;
+    //         amountOfLikes = amountOfLikes - 1;
+    //       }
+    //     });
+    // },
     deletePost() {
       axios
         .delete(this.backendUrl + "post/" + this.post.id, {
@@ -152,11 +175,10 @@ export default {
     },
     prettyTime() {
       var createdDate = moment(this.post.created).format("MMM Do, h:MM A");
-      this.post.created = createdDate;
+      this.prettyDate = createdDate;
     },
-    userLikes() {
-      var likes = this.post.likes.length;
-      this.post.likes = likes;
+    likeAmount() {
+      this.amountOfLikes = this.post.likes.length;
     },
     checkOwner() {
       if (this.post.creator_name === localStorage.currentUsername) {

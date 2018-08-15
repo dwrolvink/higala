@@ -1,7 +1,7 @@
 <template>
   <v-container grid-list-lg>
     <v-snackbar v-model="snackbar" top :color="snackbarColor">
-    {{ text }}
+    {{ snackbarText }}
     <v-btn flat @click="snackbar = false">Close</v-btn>
     </v-snackbar>
     <v-layout row wrap>
@@ -14,23 +14,16 @@
         <div v-if="posts">
           <div v-for="(post, index) in posts" :key="index">
             <Post 
-              :post="post" 
+              :post="post"
               v-on:postDeleted="removePost"
               v-on:notPostOwner="falseOwner"
               v-on:somethingWentWrong="somethingWentWrong"
             />
           </div>
+          <infinite-loading @infinite="infiniteHandler">
+            <span slot="no-more">There are no more posts to show.</span>
+          </infinite-loading>
         </div>
-        <div v-else align="center" class="mt-5">
-          <p class="mr-2 display-1">Loading posts</p>
-          <v-progress-circular
-          :size="40"
-          color="deep-purple lighten-1"
-          indeterminate
-          >
-          </v-progress-circular>
-        </div>
-
       </v-flex>
     </v-layout>
   </v-container>
@@ -38,67 +31,91 @@
 </template>
 
 <script>
-/* eslint-disable */
-import axios from 'axios';
-import { mapState } from 'vuex'
-import Post from '@/components/PostStuff/Post.vue'
-import CurrentUser from '@/components/CurrentUser.vue'
-import Create from '@/components/PostStuff/Create.vue'
+import axios from "axios";
+import InfiniteLoading from "vue-infinite-loading";
+import Post from "@/components/PostStuff/Post.vue";
+import CurrentUser from "@/components/CurrentUser.vue";
+import Create from "@/components/PostStuff/Create.vue";
 
 export default {
-  name: 'Home',
+  name: "Home",
+  created() {
+    this.getPosts();
+  },
   data() {
     return {
+      posts: [],
       backendUrl: "http://localhost:4000/",
-      posts: null,
-      errors: null,
-      loading: false,
       snackbar: false,
       snackbarColor: "",
-      text: "",
-    }
+      snackbarText: ""
+    };
   },
   components: {
+    InfiniteLoading,
     CurrentUser,
     Create,
     Post
   },
-  created() {
-    this.getPosts()
-  },
   methods: {
     getPosts() {
-      this.error = this.posts = null
-      this.loading = true
-      if (localStorage.getItem("access_token") === null){
-        this.$router.push("/login")
+      if (localStorage.getItem("access_token") === null) {
+        this.$router.push("/login");
       } else {
-        var access_token = localStorage.access_token
-        axios.get(this.backendUrl + "posts", {
+        var access_token = localStorage.access_token;
+        axios
+          .get(this.backendUrl + "posts", {
+            headers: {
+              Authorization: "Bearer " + access_token
+            }
+          })
+          .then(response => {
+            this.posts = response.data.posts;
+          })
+          .catch(error => {
+            var status = error.response.data;
+            if (status === 500) {
+              this.$router.push("/login");
+            } else {
+              this.snackbar = true;
+              this.snackbarText = "Something went wrong";
+              this.snackbarColor = "red lighten-2";
+            }
+          });
+      }
+    }, // Get Posts end
+    infiniteHandler($state) {
+      let limit = this.posts.length + 15;
+      axios
+        .get(this.backendUrl + "posts", {
           headers: {
-            Authorization: "Bearer " + access_token
+            Authorization: "Bearer " + localStorage.access_token
+          },
+          params: {
+            limit: limit
           }
         })
         .then(response => {
-          this.posts = response.data
-          this.loading = false
-          })
-        .catch(error => {
-          var status = error.response.status
-          if (status === 500) {
-            this.$router.push('/login')
-          } else {
-            this.snackbar = true;
-            this.text = "Something went wrong";
-            this.snackbarColor = "red lighten-2";
-          }
+          this.loadMore($state, response);
         });
+    },
+    loadMore($state, response) {
+      if (response.data.posts.length) {
+        this.posts = response.data.posts;
+        setTimeout(() => {
+          $state.loaded();
+        }, 3000);
+        if (response.data.total === this.posts.length) {
+          $state.complete();
+        }
+      } else {
+        $state.complete();
       }
-    }, // Get Posts end
-      updateFeed() {
-      this.getPosts()
+    },
+    updateFeed() {
+      this.getPosts();
       this.snackbar = true;
-      this.text = "Post has successfully been created";
+      this.snackbarText = "Post has successfully been created";
       this.snackbarColor = "success";
     },
     removePost(postId) {
@@ -106,17 +123,17 @@ export default {
       var index = this.posts.findIndex(post => post.id === postId);
       this.posts.splice(index, 1);
       this.snackbar = true;
-      this.text = "Post has been deleted!";
+      this.snackbarText = "Post has been deleted!";
       this.snackbarColor = "success";
     },
     falseOwner() {
       this.snackbar = true;
-      this.text = "You do not own this post!";
+      this.snackbarText = "You do not own this post!";
       this.snackbarColor = "red lighten-2";
     },
     somethingWentWrong() {
       this.snackbar = true;
-      this.text = "Something went wrong during the process"
+      this.snackbarText = "Something went wrong during the process";
       this.snackbarColor = "red lighten-2";
     }
   }

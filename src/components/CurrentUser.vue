@@ -99,7 +99,7 @@ export default {
           this.currentUser = response.data;
           // Store current username
           localStorage.currentUsername = response.data.username;
-          if (this.currentUser.roles[0] == 1) {
+          if (this.currentUser.roles[0] == "admin") {
             this.role = "Admin";
             this.ready = true;
           } else {

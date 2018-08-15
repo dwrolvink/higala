@@ -45,7 +45,7 @@ export default {
   data() {
     return {
       posts: [],
-      backendUrl: "http://localhost:4000/",
+      backendUrl: "https://konishi.hecksadecimal.com:4000/",
       snackbar: false,
       snackbarColor: "",
       snackbarText: ""
@@ -85,7 +85,7 @@ export default {
       }
     }, // Get Posts end
     infiniteHandler($state) {
-      let limit = this.posts.length + 15;
+      let limit = this.posts.length + 2;
       axios
         .get(this.backendUrl + "posts", {
           headers: {

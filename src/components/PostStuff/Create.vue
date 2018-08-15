@@ -56,7 +56,7 @@ export default {
   data() {
     return {
       valid: true,
-      backendUrl: "http://localhost:4000/",
+      backendUrl: "https://konishi.hecksadecimal.com:4000/",
       postContent: "",
       snackbar: false,
       text: "",

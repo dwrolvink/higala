@@ -75,7 +75,7 @@ export default {
   name: "CurrentUser",
   data() {
     return {
-      backendUrl: "http://localhost:4000/",
+      backendUrl: "https://konishi.hecksadecimal.com:4000/",
       currentUser: "",
       role: "",
       joinedDate: "",

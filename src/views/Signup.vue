@@ -208,7 +208,7 @@ export default {
   name: "Signup",
   data() {
     return {
-      backendUrl: "http://localhost:4000/",
+      backendUrl: "https://konishi.hecksadecimal.com:4000/",
       valid: true,
       snackbar: false,
       successBar: false,

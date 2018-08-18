@@ -1,6 +1,4 @@
-# Higala
-
-Konishi's frontend written in Vue with Vuetify for Material Design
+# higalav2
 
 ## Project setup
 ```

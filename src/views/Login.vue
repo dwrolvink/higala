@@ -1,92 +1,90 @@
 <template>
-  <div id="login">
-    <v-container grid-list-md>
-      <v-layout row wrap>
-        <v-flex offset-xs3 xs6>
-          <v-snackbar
-            v-model="snackbar"
-            top
-            :color="color"
-          >
-          {{ text }}
-          <v-btn
-            flat
-            @click="snackbar = false"
-          >Close</v-btn>
-          </v-snackbar>
-          <v-card class="elevation-5">
-            <v-form ref="loginForm" v-model="valid" lazy-validation>
-              <v-card-title primary-title class="display-1 font-weight-light">
-                Login to Konishi
+  <v-container grid-list-md>
+    <v-layout row wrap>
+      <v-flex offset-md3 md6 xs12>
+        <v-snackbar
+          v-model="snackbar"
+          top
+          :color="color"
+        >
+        {{ text }}
+        <v-btn
+          flat
+          @click="snackbar = false"
+        >Close</v-btn>
+        </v-snackbar>
+        <v-card class="elevation-5">
+          <v-form ref="loginForm" v-model="valid" lazy-validation>
+            <v-card-title primary-title class="display-1 font-weight-light">
+              Login to Konishi
+            </v-card-title>
+            <v-layout row wrap>
+              <v-card-title>
+                <v-flex xs12>
+                  <v-text-field
+                    label="Username"
+                    prepend-icon="person"
+                    required
+                    v-model="username"
+                    @keyup.enter="login"
+                    :rules="usernameRules"
+                  >
+                  </v-text-field>
+                </v-flex>
+                <v-flex xs12>
+                  <v-text-field
+                    :append-icon="showPassword ? 'visibility' : 'visibility_off'"
+                    :type="showPassword ? 'text' : 'password'"
+                    :rules="passwordRules"
+                    v-model="password"
+                    prepend-icon="vpn_key"
+                    label="Password"
+                    hint="At least 8 characters"
+                    class="input-group--focused"
+                    @click:append="showPassword = !showPassword"
+                    @keyup.enter="login"
+                    required
+                  ></v-text-field>
+                </v-flex>
               </v-card-title>
+            </v-layout>
+            <v-card-actions>
               <v-layout row wrap>
-                <v-card-title>
-                  <v-flex xs12>
-                    <v-text-field
-                      label="Username"
-                      prepend-icon="person"
-                      required
-                      v-model="username"
-                      @keyup.enter="login"
-                      :rules="usernameRules"
-                    >
-                    </v-text-field>
-                  </v-flex>
-                  <v-flex xs12>
-                    <v-text-field
-                      :append-icon="showPassword ? 'visibility' : 'visibility_off'"
-                      :type="showPassword ? 'text' : 'password'"
-                      :rules="passwordRules"
-                      v-model="password"
-                      prepend-icon="vpn_key"
-                      label="Password"
-                      hint="At least 8 characters"
-                      class="input-group--focused"
-                      @click:append="showPassword = !showPassword"
-                      @keyup.enter="login"
-                      required
-                    ></v-text-field>
-                  </v-flex>
-                </v-card-title>
+                <v-flex xs6>
+                  <v-btn 
+                    flat 
+                    block
+                    color="deep-purple lighten-2"
+                    :disabled="!valid"
+                    @click="login"
+                  >
+                    <v-icon>exit_to_app</v-icon>
+                    <div class="ml-1">Login</div>
+                  </v-btn>
+                </v-flex>
+                <v-flex xs6>
+                  <v-btn flat block color="green lighten-1" @click="signup">
+                    <v-icon class="mr-1">beenhere</v-icon>
+                    signup
+                  </v-btn>
+                </v-flex>
               </v-layout>
-              <v-card-actions>
-                <v-layout row wrap>
-                  <v-flex xs6>
-                    <v-btn 
-                      flat 
-                      block
-                      color="deep-purple"
-                      :disabled="!valid"
-                      @click="login"
-                    >
-                      <v-icon>exit_to_app</v-icon>
-                      <div class="ml-1">Login</div>
-                    </v-btn>
-                  </v-flex>
-                  <v-flex xs6>
-                    <v-btn flat block color="green lighten-1" @click="signup">
-                      <v-icon class="mr-1">beenhere</v-icon>
-                      signup
-                    </v-btn>
-                  </v-flex>
-                </v-layout>
-              </v-card-actions>
-            </v-form>
-          </v-card>
-        </v-flex>
-      </v-layout>
-    </v-container>
-  </div>
+            </v-card-actions>
+          </v-form>
+        </v-card>
+      </v-flex>
+    </v-layout>
+  </v-container>
 </template>
 
 <script>
 import axios from "axios";
+import { mapState } from "vuex";
 
 export default {
   name: "Login",
   data() {
     return {
-      backendUrl: "https://konishi.hecksadecimal.com:4000/",
       showPassword: false,
       valid: true,
       snackbar: false,
@@ -107,6 +105,9 @@ export default {
       ]
     };
   },
+  computed: {
+    ...mapState(["backendUrl"])
+  },
   mounted() {
     this.checkLogin();
   },
@@ -121,6 +122,7 @@ export default {
           .then(response => {
             if (response.data.success == true) {
               localStorage.access_token = response.data.access_token;
+              this.saveUserInfo();
               // Redirect user to Home page.
               this.$router.push({ name: "home" });
             }
@@ -131,9 +133,9 @@ export default {
               this.snackbar = true;
               this.text = "Incorrect username or password";
               this.color = "red lighten-2";
-            } else if (status === 404) {
+            } else {
               this.snackbar = true;
-              this.text = "Uh oh! 404 User Not Found";
+              this.text = "Incorrect username or password";
               this.color = "red lighten-2";
             }
           });
@@ -146,6 +148,28 @@ export default {
     },
     signup() {
       this.$router.push("/signup");
+    },
+    saveUserInfo() {
+      axios
+        .get(this.backendUrl + "currentuser", {
+          headers: {
+            Authorization: "Bearer " + localStorage.access_token
+          }
+        })
+        .then(response => {
+          localStorage.setItem(
+            "currentUser",
+            JSON.stringify({
+              username: response.data.username,
+              bio: response.data.bio,
+              email: response.data.email,
+              firstName: response.data.first_name,
+              lastName: response.data.last_name,
+              role: response.data.roles,
+              loggedIn: true
+            })
+          );
+        });
     }
   }
 };

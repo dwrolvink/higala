@@ -25,7 +25,7 @@
       >Login</v-btn>
       </v-snackbar>
       <v-layout row wrap>
-        <v-flex xs6>
+        <v-flex xs12 md6>
           <v-container>
             <v-card dark class="elevation-5">
               <v-card-title primary-title class="display-1 font-weight-light">
@@ -37,30 +37,30 @@
               <v-card-title>
                 <v-container>
                   <v-layout row wrap>
-                    <v-flex xs3>
-                      <i class="fas fa-hand-holding-usd" style="font-size: 5rem;"></i>
+                    <v-flex xs12 md3>
+                      <i class="fas fa-hand-holding-usd text-xs-center" style="font-size: 5rem;"></i>
                     </v-flex>
-                    <v-flex xs9>
+                    <v-flex xs12 md9>
                       <p class="text-xs-center title font-weight-medium">It's Free!</p>
                       <p class="text-xs-center subheading font-weight-light">
                         You don't need to pay a single dime to use Konishi and will stay that way, it is 
                         also free as in freedom!
                       </p>
                     </v-flex>
-                    <v-flex xs3>
+                    <v-flex xs12 md3>
                       <i class="fas fa-file-code" style="font-size: 5rem;"></i>
                     </v-flex>
-                    <v-flex xs9>
+                    <v-flex xs12 md9>
                       <p class="text-xs-center title font-weight-medium">Open Sauce!</p>
                       <p class="text-xs-center subheading font-weight-light">
                         The code is free to snag and use without having to be limited by rules!
                         It is licensed in GNU's GPL v3
                       </p>
                     </v-flex>
-                    <v-flex xs3>
+                    <v-flex xs12 md3>
                       <i class="fas fa-user-secret" style="font-size: 5rem;"></i>
                     </v-flex>
-                    <v-flex xs9>
+                    <v-flex xs12 md9>
                       <p class="text-xs-center title font-weight-medium">Privacy!</p>
                       <p class="text-xs-center subheading font-weight-light">
                         Unlike other social media, we don't sell or maliciously use your
@@ -74,7 +74,8 @@
             </v-card>
           </v-container>
         </v-flex>
-        <v-flex xs6>
+
+        <v-flex xs12 md6>
           <v-container>
             <v-card class="elevation-5">
               <v-form ref="form" v-model="valid" lazy-validation>
@@ -167,7 +168,7 @@
                     dark 
                     block 
                     flat 
-                    color="pink lighten-2"
+                    color="lime accent-3"
                     @click="goToLogin"
                   >
                   I have an account
@@ -203,12 +204,12 @@
 
 <script>
 import axios from "axios";
+import { mapState } from "vuex";
 
 export default {
   name: "Signup",
   data() {
     return {
-      backendUrl: "https://konishi.hecksadecimal.com:4000/",
       valid: true,
       snackbar: false,
       successBar: false,
@@ -244,6 +245,9 @@ export default {
       entryKey: ""
     };
   }, // Data end
+  computed: {
+    ...mapState(["backendUrl"])
+  },
   methods: {
     goToLogin() {
       this.$router.push("/login");

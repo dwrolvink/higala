@@ -11,14 +11,16 @@
       <v-flex xs12 md6>
         <Create v-on:postCreated="updateFeed"/>
         <div v-if="posts">
+          <transition-group name="posts" leave-active-class="animated fadeOutRight">
           <div v-for="(post, index) in posts" :key="index">
             <Post
               :post="post"
+              :index="index"
               v-on:postDeleted="removePost"
               v-on:snackbarMessage="snackbarMessage"
             />
           </div>
-          <mugen-scroll :handler="getPostsInfo" :should-handle="!loading"></mugen-scroll>
+           </transition-group>
         </div>
       </v-flex>
     </v-layout>
@@ -27,7 +29,7 @@
 
 <script>
 import axios from "axios";
-import MugenScroll from "vue-mugen-scroll";
+// import MugenScroll from "vue-mugen-scroll";
 import CurrentUser from "@/components/CurrentUser";
 import Create from "@/components/PostStuff/Create";
 import Post from "@/components/PostStuff/Post";
@@ -53,14 +55,14 @@ export default {
   },
   // Components
   components: {
-    MugenScroll,
+    // MugenScroll,
     CurrentUser,
     Create,
     Post
   },
   methods: {
     getPostIds() {
-    this.loading = true;
+      this.loading = true;
       if (localStorage.getItem("access_token") === null) {
         this.$router.push("/login");
       } else {
@@ -89,7 +91,7 @@ export default {
     }, // Get Posts end
     getPostsInfo() {
       this.loading = true;
-      console.log("fired!")
+      console.log("fired!");
       axios
         .post(
           this.backendUrl + "feed",
@@ -111,32 +113,31 @@ export default {
             this.somethingWentWrong();
           }
         })
-        .then(this.loading = false);
+        .then((this.loading = false));
     },
     updateFeed(msg, color) {
-      this.getPosts();
+      this.getPostIds();
       this.snackbar = true;
       this.snackbarText = msg;
       this.snackbarColor = color;
     },
-    removePost(postId) {
+    removePost(index) {
       // Get item index
-      var index = this.posts.findIndex(post => post.id == postId);
       this.posts.splice(index, 1);
-      this.snackbar = true;
-      this.snackbarText = "Post has been deleted!";
-      this.snackbarColor = "success";
+      this.snackbarMessage("Post has been deleted!", "success");
     },
     snackbarMessage(msg, color) {
       this.snackbar = true;
       this.snackbarText = msg;
       this.snackbarColor = color;
     },
-    commentSuccess() {
-      this.snackbar = true;
-      this.snackbarText = "User has commented on post";
-      this.snackbarColor = "success";
+    deletePost(index) {
+      this.posts.splice(index, 1);
     }
   }
 };
 </script>
+
+<style scoped>
+@import "https://cdn.jsdelivr.net/npm/animate.css@3.5.2/animate.min.css";
+</style>

@@ -22,7 +22,7 @@
 
           <v-menu
             bottom
-            v-show="owner"
+            v-show="owner || admin"
             right
             lazy
             transition="slide-y-transition"
@@ -43,8 +43,8 @@
                 <v-list-tile-title>Delete post</v-list-tile-title>
               </v-list-tile>
             </v-list>
-            <v-list>
-              <v-list-tile @click="editPost">
+            <v-list v-show="owner">
+              <v-list-tile @click="deletePost">
                 <v-list-tile-title>Edit post</v-list-tile-title>
               </v-list-tile>
             </v-list>
@@ -106,6 +106,12 @@
           <Comment :comment="comment"/>
         </v-card-text>
       </div>
+      <v-card-actions v-if="showMoreComments" class="pt-0 pb-2 text-xs-center">
+        <v-btn block dark flat color="red lighten-1" @click="showMoreComments">
+          <v-icon class="mr-2">forum</v-icon>
+          Show More comments
+        </v-btn>
+      </v-card-actions>
     </v-card>
 
       <v-dialog v-model="dialog" persistent max-width="500px">
@@ -170,7 +176,7 @@ import { mapState } from "vuex";
 
 export default {
   name: "Post",
-  props: ["post"],
+  props: ["post", "index"],
   data() {
     return {
       normalView: true,
@@ -178,12 +184,14 @@ export default {
       postLiked: false,
       postTruncateLimit: 477,
       owner: false,
+      admin: false,
       prettyDate: null,
       amountOfLikes: 0,
       amountOfComments: 0,
       dialog: false,
       valid: true,
-      commentContent: ""
+      commentContent: "",
+      commentShowMore: true
     };
   },
   components: {
@@ -197,7 +205,7 @@ export default {
     this.checkIfLiked();
     this.likeAmount();
     this.commentAmount();
-    this.getCommentsInfo();
+    this.getCommentsInfo(2);
   },
   mounted() {
     this.checkOwner();
@@ -225,9 +233,11 @@ export default {
         })
         .catch(error => {
           if (error.response.status === 500) {
-            this.$emit("snackbarMessage",
-                       "Something went wrong during the process", // MSG
-                       "red lighten-2"); // COLOR
+            this.$emit(
+              "snackbarMessage",
+              "Something went wrong during the process", // MSG
+              "red lighten-2"
+            ); // COLOR
           }
         });
     },
@@ -254,15 +264,17 @@ export default {
         })
         .then(response => {
           if (response.status === 200) {
-            this.$emit("postDeleted", this.post.id);
+            this.$emit("postDeleted", this.index);
           }
         })
         .catch(error => {
           var status = error.response.status;
           if (status === 403) {
-            this.$emit("snackbarMessage",
-                       "You do not own this post",
-                       "red lighten-2");
+            this.$emit(
+              "snackbarMessage",
+              "You do not own this post",
+              "red lighten-2"
+            );
           }
         });
     },
@@ -273,17 +285,21 @@ export default {
     likeAmount() {
       this.amountOfLikes = this.post.likes.length;
     },
-   commentAmount() {
+    commentAmount() {
       this.amountOfComments = this.post.comments.length;
     },
     checkOwner() {
-      let currentUser= JSON.parse(localStorage.getItem("currentUser"));
-      if (this.post.creator_name === localStorage.currentUsername || currentUser.role[0] === 1) {
+      let currentUser = JSON.parse(localStorage.getItem("currentUser"));
+      // Check owner
+      if (this.post.creator_name === localStorage.currentUsername) {
         this.owner = true;
       }
+      if (currentUser.role[0] === 1) {
+        this.admin = true;
+      }
     },
-    getCommentsInfo() {
-      let comments = this.post.comments.slice(0, 3)
+    getCommentsInfo(amount) {
+      let comments = this.post.comments.slice(0, amount);
       if (this.post.comments.length != 0) {
         axios
           .post(
@@ -299,19 +315,22 @@ export default {
           )
           .then(response => {
             this.comments = response.data.comments;
+            this.commentShow = "More";
           })
           .catch(error => {
             if (error.response.status === 500) {
-              this.$emit("snackbarMessage", 
-                         "Something went wrong during the process",  // MSG
-                         "red lighten-2"); // COLOR
+              this.$emit(
+                "snackbarMessage",
+                "Something went wrong during the process", // MSG
+                "red lighten-2"
+              ); // COLOR
             }
           });
       }
     },
     closeComment() {
-      this.$refs.commentForm.reset()
-      this.dialog = false
+      this.$refs.commentForm.reset();
+      this.dialog = false;
     },
     sendComment() {
       if (this.$refs.commentForm.validate()) {
@@ -319,29 +338,42 @@ export default {
           .post(
             this.backendUrl + "post/" + this.post.id,
             {
-              content: this.commentContent,
+              content: this.commentContent
             },
             {
               headers: { Authorization: "Bearer " + localStorage.access_token }
-            })
+            }
+          )
           .then(response => {
             if (response.status === 200) {
               this.$refs.commentForm.reset();
               this.dialog = false;
-              this.getCommentsInfo();
-              this.$emit("snackbarMessage", 
-                         "Successfully commented on the post",
-                         "success");
+              if (this.commentShowMore === true) {
+                this.getCommentsInfo(2);
+              } else {
+                this.getCommentsInfo();
+              }
+              this.$emit(
+                "snackbarMessage",
+                "Successfully commented on the post",
+                "success"
+              );
             }
           })
           .catch(error => {
             if (error.response.status === 500) {
-              this.$emit("snackbarMessage",
-                         "Something went wrong during the process", // MSG
-                         "red lighten-2"); // COLOR
+              this.$emit(
+                "snackbarMessage",
+                "Something went wrong during the process", // MSG
+                "red lighten-2"
+              ); // COLOR
             }
           });
       }
+    },
+    showMoreComments() {
+      this.getCommentsInfo(this.post.comments.length);
+      this.showMoreComments = false;
     }
   }
 };

@@ -1,5 +1,5 @@
 <template>
-  <v-card class="elevation-3" color="grey darken-1">
+  <v-card class="elevation-3" color="grey darken-1 pb-0">
     <v-card-title primary-title class="pb-0">
         <read-more
         more-str="Read more"

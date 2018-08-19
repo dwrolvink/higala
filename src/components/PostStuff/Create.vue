@@ -57,7 +57,7 @@ export default {
       valid: true,
       postContent: "",
       errors: null,
-      createRules: [v => (v && v.length <= 1500)]
+      createRules: [v => v && v.length <= 1500]
     };
   },
   computed: {
@@ -84,14 +84,20 @@ export default {
             console.log(response.data.post);
             if (response.status === 200) {
               this.$refs.createForm.reset();
-              this.$emit("postCreated", "Post has successfully been created", "success");
+              this.$emit(
+                "postCreated",
+                "Post has successfully been created",
+                "success"
+              );
             }
           })
           .catch(error => {
-            this.$emit("snackbarMessage", 
-                        "Something went wrong during the process", // MSG
-                        "red lighten-2"); // COLOR
-         });
+            this.$emit(
+              "snackbarMessage",
+              "Something went wrong during the process", // MSG
+              "red lighten-2"
+            ); // COLOR
+          });
       }
     }
   }

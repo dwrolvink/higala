@@ -1,100 +1,94 @@
 <template>
-  <v-container fluid grid-list-md>
-    <v-snackbar v-model="snackbar" top :color="snackbarColor">
-      {{ snackbarText }}
-      <v-btn flat @click="snackbar = false">Close</v-btn>
-    </v-snackbar>
-    <v-layout row wrap>
-      <v-flex xs12 md3>
-        <CurrentUser v-on:snackbarMessage="snackbarMessage"/>
-      </v-flex>
-      <v-flex xs12 md6>
-        <Create v-on:postCreated="updateFeed"/>
-        <div v-if="posts">
-          <transition-group name="posts" leave-active-class="animated fadeOutRight">
-          <div v-for="(post, index) in posts" :key="index">
-            <Post
-              :post="post"
-              :index="index"
-              v-on:postDeleted="removePost"
-              v-on:snackbarMessage="snackbarMessage"
-            />
+  <section class="hero is-dark is-fullheight">
+    <div class="hero-body">
+      <div class="container">
+        <div class="columns">
+          <div class="column is-3">
+            <Currentuser/>
           </div>
-           </transition-group>
+          <div class="column is-6">
+            <div class="mb4">
+              <Create
+                v-on:postCreated="updateFeed"
+              />
+            </div>
+            <div v-if="posts">
+              <div v-for="(post, index) in posts" :key="index">
+                <Post
+                  :post="post"
+                  :index="index"
+                  v-on:serverError="serverError"
+                />
+              </div>
+            </div>
+            <button class="mt3 button"
+              @click="getPostIds"
+            >Get Posts</button>
+          </div>
+          <div class="column is-3"></div>
         </div>
-      </v-flex>
-    </v-layout>
-  </v-container>
+      </div>
+    </div>
+  </section>
 </template>
 
 <script>
 import axios from "axios";
-// import MugenScroll from "vue-mugen-scroll";
-import CurrentUser from "@/components/CurrentUser";
+import { mapState } from "vuex";
+import Currentuser from "@/components/PostStuff/Currentuser";
 import Create from "@/components/PostStuff/Create";
 import Post from "@/components/PostStuff/Post";
-import { mapState } from "vuex";
 
 export default {
-  name: "Home",
+  name: "home",
+  components: {
+    Currentuser,
+    Create,
+    Post
+  },
   data() {
     return {
       posts: [],
-      post_ids: [],
-      loading: false,
-      snackbar: false,
-      snackbarColor: "",
-      snackbarText: ""
+      post_ids: []
     };
-  },
-  mounted() {
-    this.getPostIds();
   },
   computed: {
     ...mapState(["backendUrl"])
   },
-  // Components
-  components: {
-    // MugenScroll,
-    CurrentUser,
-    Create,
-    Post
+  created() {
+    this.checkLogin();
   },
   methods: {
-    getPostIds() {
-      this.loading = true;
-      if (localStorage.getItem("access_token") === null) {
+    checkLogin() {
+      if (localStorage.access_token == null) {
         this.$router.push("/login");
-      } else {
-        var access_token = localStorage.access_token;
-        axios
-          .get(this.backendUrl + "feed", {
-            headers: {
-              Authorization: "Bearer " + access_token
-            }
-          })
-          .then(response => {
-            this.post_ids = response.data.post_ids;
-            this.getPostsInfo();
-          })
-          .catch(error => {
-            var status = error.response.data;
-            if (status === 500) {
-              this.$router.push("/login");
-            } else {
-              this.snackbar = true;
-              this.snackbarText = "Something went wrong";
-              this.snackbarColor = "red lighten-2";
-            }
-          });
       }
-    }, // Get Posts end
+    },
+    getPostIds() {
+      axios
+        .get(this.backendUrl + "/feed", {
+          headers: {
+            Authorization: "Bearer " + localStorage.access_token
+          }
+        })
+        .then(response => {
+          if (response.status === 200) {
+            if (this.post_ids != undefined || this.post_ids.length != 0) {
+              this.post_ids = response.data.post_ids;
+              this.getPostsInfo();
+            }
+          }
+        })
+        .catch(error => {
+          if (error.response.status === 500) {
+            this.toast("Something went wrong during the process", "is-danger");
+          }
+        });
+    },
     getPostsInfo() {
-      this.loading = true;
-      console.log("fired!");
       axios
         .post(
-          this.backendUrl + "feed",
+          this.backendUrl + "/feed",
           {
             post_ids: this.post_ids
           },
@@ -105,39 +99,33 @@ export default {
           }
         )
         .then(response => {
-          this.posts = response.data.posts;
-        })
-        .catch(error => {
-          this.loading = false;
-          if (error.response.status === 500) {
-            this.somethingWentWrong();
+          if (response.status === 200) {
+            this.posts = response.data.posts;
           }
         })
-        .then((this.loading = false));
+        .catch(error => {
+          if (error.response.status === 500) {
+            this.toast("Something went wrong during the process", "is-danger");
+          }
+        });
     },
-    updateFeed(msg, color) {
-      this.getPostIds();
-      this.snackbar = true;
-      this.snackbarText = msg;
-      this.snackbarColor = color;
+    toast(msg, type) {
+      this.$toast.open({
+        duration: 3000,
+        message: msg,
+        type: type
+      });
     },
-    removePost(index) {
-      // Get item index
-      this.posts.splice(index, 1);
-      this.snackbarMessage("Post has been deleted!", "success");
+    updateFeed(newpost) {
+      console.log("new POST!")
+      this.toast("Post has successfully been created", "is-success");
+      console.log(newpost);
+      this.posts.unshift(newpost);
+      console.log(newpost.id)
     },
-    snackbarMessage(msg, color) {
-      this.snackbar = true;
-      this.snackbarText = msg;
-      this.snackbarColor = color;
-    },
-    deletePost(index) {
-      this.posts.splice(index, 1);
+    serverError() {
+      this.toast("Something went wrong during the process", "is-danger");
     }
   }
 };
 </script>
-
-<style scoped>
-@import "https://cdn.jsdelivr.net/npm/animate.css@3.5.2/animate.min.css";
-</style>

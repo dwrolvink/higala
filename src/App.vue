@@ -1,14 +1,14 @@
 <template>
-  <v-app id="inspire" dark>
-    <Navbar/>
-    <v-content>
+  <div id="app">
+    <Navbar class="mb-2"/>
+    <div id="main">
       <router-view/>
-    </v-content>
-  </v-app>
+    </div>
+  </div>
 </template>
 
 <script>
-import Navbar from "@/components/Navbar/Navbar";
+import Navbar from "@/components/Navbar";
 
 export default {
   name: "App",

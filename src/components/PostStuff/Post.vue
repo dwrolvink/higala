@@ -1,379 +1,182 @@
 <template>
-  <div id="post">
-    <v-card class="elevation-3 mb-3">
-      <v-card-title primary-title>
-        <!-- Add profile pictures here later on -->
-          <h3 class="title font-weight-light"> {{ post.creator_name }} </h3>
-          <v-spacer></v-spacer>
-
-          <v-tooltip bottom>
-            <v-btn 
-              flat 
-              icon 
-              small 
-              color="lime accent-3"
-              slot="activator"
-              @click="normalView = !normalView"
-            >
-              <v-icon>code</v-icon>
-            </v-btn>
-            <span>Code view</span>
-          </v-tooltip>
-
-          <v-menu
-            bottom
-            v-show="owner || admin"
-            right
-            lazy
-            transition="slide-y-transition"
+  <article class="card mb3">
+    <div class="card-content">
+      <div class="media">
+        <div class="media-left">
+          <figure class="image is-64x64">
+            <img src="https://api.adorable.io/avatars/64/abott@adorable.png"/>
+          </figure>
+        </div>
+        <div class="media-content">
+          <p class="title is-4 has-text-dark has-text-weight-light">{{ post.creator_name }}</p>
+          <p class="subtitle is-6 has-text-grey">{{ creationDate }}</p>
+        </div>
+        <div class="media-right">
+          <b-tooltip 
+            label="Markdown view" 
+            position="is-bottom"
+            animated
+            square
           >
-
-            <v-btn 
-              flat 
-              icon 
-              small 
-              color="lime accent-3"
-              slot="activator"
-            >
-              <v-icon>more_vert</v-icon>
-            </v-btn>
-
-            <v-list>
-              <v-list-tile @click="deletePost">
-                <v-list-tile-title>Delete post</v-list-tile-title>
-              </v-list-tile>
-            </v-list>
-            <v-list v-show="owner">
-              <v-list-tile @click="deletePost">
-                <v-list-tile-title>Edit post</v-list-tile-title>
-              </v-list-tile>
-            </v-list>
-          </v-menu>
-          <br/>
-      </v-card-title>
-      <v-card-text>
-        <div v-if="normalView">
-          <read-more
-            more-str="Read more"
-            less-str="Read less"
-            class="subheading"
-            :text="post.content"
-            :max-chars="477"
-            link="#"
-          >
-          </read-more>
-        </div>
-        <div v-else>
-          <vue-simple-markdown :source="post.content" class="white--text"></vue-simple-markdown>
-        </div>
-
-      </v-card-text>
-      <v-card-actions>
-        <div 
-        class="ml-1 mt-1" 
-        :class="postLiked? 'orange--text accent-2--text': 'grey--text'"
-        >
-        {{ amountOfLikes }}
-        </div>
-        <v-btn
-          icon 
-          flat 
-          :color="postLiked? 'orange accent-2': 'grey'"
-          v-on="{click: postLiked? unlikePost: likePost}"
-        >
-          <v-icon>thumb_up</v-icon>
-        </v-btn>
-        <div 
-        class="ml-1 mt-1 grey--text"
-        >
-        {{ amountOfComments }}
-        </div>
-        <v-btn 
-          icon
-          flat
-          color="grey"
-          slot="activator"
-          @click.stop="dialog = true"
-        >
-          <v-icon>forum</v-icon>
-        </v-btn>
-        <v-spacer></v-spacer>
-        <h3 class="subheading font-weight-light"> {{ prettyDate }} </h3>
-      </v-card-actions>
-      <v-divider></v-divider>
-      <div v-if="post.comments">
-        <v-card-text v-for="(comment, index) in comments" :key="index">
-          <Comment :comment="comment"/>
-        </v-card-text>
-      </div>
-      <v-card-actions v-if="showMoreComments" class="pt-0 pb-2 text-xs-center">
-        <v-btn block dark flat color="red lighten-1" @click="showMoreComments">
-          <v-icon class="mr-2">forum</v-icon>
-          Show More comments
-        </v-btn>
-      </v-card-actions>
-    </v-card>
-
-      <v-dialog v-model="dialog" persistent max-width="500px">
-      <v-card>
-        <v-container>
-          <v-card class="elevation-3" style="background-color: #4d4d4d;">
-            <v-card-title primary-title class="title">
-              <span class="font-weight-light">{{ post.creator_name }}</span>
-              <v-spacer></v-spacer>
-                <v-icon small color="lime accent-3">code</v-icon>
-                <v-icon small color="lime accent-3">more_vert</v-icon>
-            </v-card-title>
-            <v-card-text>
-              <read-more
-                more-str=""
-                less-str=""
-                class="subheading"
-                :text="post.content"
-                :max-chars="70"
-                link="#"
+            <button class="button is-small mr1">
+              <b-icon
+                icon="markdown"
               >
-              </read-more>
-            </v-card-text>
-          </v-card>
-        </v-container>
+              </b-icon>
+            </button>
+          </b-tooltip>
+         
+          <b-dropdown v-show="owner || admin">
+              <button class="button is-small ml1" slot="trigger">
+                  <b-icon icon="dots-vertical"></b-icon>
+              </button>
 
-        <v-divider></v-divider>
-        <v-card-text>
-          <v-layout wrap>
-            <v-flex xs12>
-              <v-form ref="commentForm" v-model="valid" lazy-validation>
-                <v-textarea 
-                  label="Comment" 
-                  auto-grow
-                  row-height="5"
-                  required
-                  box
-                  v-model="commentContent"
-                  :rules="[v => !!v || 'Required!']"
-                ></v-textarea>
-              </v-form>
-            </v-flex>
-          </v-layout>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="white darken-1" flat @click="closeComment">Close</v-btn>
-          <v-btn color="orange accent-2" flat :disabled="!valid" @click="sendComment">
-            Comment
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-  </div>
+              <b-dropdown-item>Delete</b-dropdown-item>
+              <b-dropdown-item v-show="owner">Edit</b-dropdown-item>
+          </b-dropdown>
+        </div>
+      </div>
+
+      <div class="content">
+        <truncate clamp="..." 
+          :length="477" 
+          less="Show less"
+          :text="post.content"
+        ></truncate>
+      </div>
+    </div>
+
+      <div v-if="post.image_id">
+        <div class="card-image" @click="isImageModalActive = true">
+          <figure class="image is-4by3">
+            <img :src="imageSrc" alt="Placeholder image">
+          </figure>
+        </div>
+      </div>
+
+      <div class="mt3 pr3 pl3 pb3">
+        <button :class="['button', kekGiven? 'is-dark' : '']" 
+          v-on="{click: kekGiven? unlikePost : likePost}"
+        >
+          <b-icon icon="thumb-up" size="is-small"></b-icon>
+          <span class="ml1">{{ keks }}</span>
+        </button>
+
+        <button class="ml2 button is-info">
+          <b-icon
+            icon="forum"
+            size="is-small"
+          >
+          </b-icon>
+          <span class="ml1">{{ comments }}</span>
+        </button>
+      </div>
+
+      <b-modal :active.sync="isImageModalActive">
+          <p class="image is-4by3">
+              <img :src="imageSrc">
+          </p>
+      </b-modal>
+  </article>
 </template>
 
 <script>
-import axios from "axios";
 import moment from "moment";
-import Comment from "@/components/PostStuff/Comment";
+import truncate from "vue-truncate-collapsed";
+import axios from "axios";
 import { mapState } from "vuex";
 
 export default {
   name: "Post",
-  props: ["post", "index"],
-  data() {
-    return {
-      normalView: true,
-      comments: [],
-      postLiked: false,
-      postTruncateLimit: 477,
-      owner: false,
-      admin: false,
-      prettyDate: null,
-      amountOfLikes: 0,
-      amountOfComments: 0,
-      dialog: false,
-      valid: true,
-      commentContent: "",
-      commentShowMore: true
-    };
-  },
-  components: {
-    Comment
-  },
+  props: ["post"],
   computed: {
     ...mapState(["backendUrl"])
   },
-  created() {
-    this.prettyTime();
-    this.checkIfLiked();
-    this.likeAmount();
-    this.commentAmount();
-    this.getCommentsInfo(2);
+  data() {
+    return {
+      kekGiven: false,
+      keks: 0,
+      comments: 0,
+      isImageModalActive: false,
+      creationDate: "",
+      imageSrc: "https://source.unsplash.com/1280x720/?nature,water",
+      owner: false,
+      admin: false
+    };
   },
-  mounted() {
+  components: {
+    truncate
+  },
+  created() {
+    this.amountOfKeks();
+    this.amountOfComments();
+    this.prettifyDate();
     this.checkOwner();
   },
   methods: {
-    checkIfLiked() {
+    amountOfKeks() {
+      // Check if the user liked the post
       if (this.post.liked === true) {
-        this.postLiked = true;
-      } else {
-        this.postLiked = false;
+        this.kekGiven = true;
       }
+      this.keks = this.post.likes.length;
+    },
+    prettifyDate() {
+      var prettyDate = moment(this.post.created).format("MMM Do, h:MM A");
+      this.creationDate = prettyDate;
+    },
+    checkOwner() {
+      // Get current user
+      var currentuser = JSON.parse(localStorage.getItem("currentuser"));
+      if (
+        this.post.creator_name === currentuser.username ||
+        currentuser.roles[0] === 1
+      ) {
+        this.owner = true;
+      } else if (currentuser.roles[0] === 1) {
+        this.admin = true;
+      }
+    },
+    amountOfComments() {
+      this.comments = this.post.comments.length;
     },
     likePost() {
       axios
-        .post(this.backendUrl + "post/" + this.post.id + "/like", null, {
+        .post(this.backendUrl + "/post/" + this.post.id + "/like", null, {
           headers: {
             Authorization: "Bearer " + localStorage.access_token
           }
         })
         .then(response => {
           if (response.status === 201) {
-            this.amountOfLikes = this.amountOfLikes + 1;
-            this.postLiked = true;
+            this.kekGiven = true;
+            this.keks = this.keks + 1;
           }
         })
         .catch(error => {
           if (error.response.status === 500) {
-            this.$emit(
-              "snackbarMessage",
-              "Something went wrong during the process", // MSG
-              "red lighten-2"
-            ); // COLOR
+            this.$emit("serverError");
           }
         });
     },
     unlikePost() {
       axios
-        .delete(this.backendUrl + "post/" + this.post.id + "/like", {
+        .delete(this.backendUrl + "/post/" + this.post.id + "/like", {
           headers: {
             Authorization: "Bearer " + localStorage.access_token
           }
         })
         .then(response => {
           if (response.status === 200) {
-            this.postLiked = false;
-            this.amountOfLikes = this.amountOfLikes - 1;
-          }
-        });
-    },
-    deletePost() {
-      axios
-        .delete(this.backendUrl + "post/" + this.post.id, {
-          headers: {
-            Authorization: "Bearer " + localStorage.access_token
-          }
-        })
-        .then(response => {
-          if (response.status === 200) {
-            this.$emit("postDeleted", this.index);
+            this.kekGiven = false;
+            this.keks = this.keks - 1;
           }
         })
         .catch(error => {
-          var status = error.response.status;
-          if (status === 403) {
-            this.$emit(
-              "snackbarMessage",
-              "You do not own this post",
-              "red lighten-2"
-            );
+          if (error.response.status === 500) {
+            this.$emit("serverError");
           }
         });
-    },
-    prettyTime() {
-      var createdDate = moment(this.post.created).format("MMM Do, h:MM A");
-      this.prettyDate = createdDate;
-    },
-    likeAmount() {
-      this.amountOfLikes = this.post.likes.length;
-    },
-    commentAmount() {
-      this.amountOfComments = this.post.comments.length;
-    },
-    checkOwner() {
-      let currentUser = JSON.parse(localStorage.getItem("currentUser"));
-      // Check owner
-      if (this.post.creator_name === localStorage.currentUsername) {
-        this.owner = true;
-      }
-      if (currentUser.role[0] === 1) {
-        this.admin = true;
-      }
-    },
-    getCommentsInfo(amount) {
-      let comments = this.post.comments.slice(0, amount);
-      if (this.post.comments.length != 0) {
-        axios
-          .post(
-            this.backendUrl + "postcomments",
-            {
-              comment_ids: comments
-            },
-            {
-              headers: {
-                Authorization: "Bearer " + localStorage.access_token
-              }
-            }
-          )
-          .then(response => {
-            this.comments = response.data.comments;
-            this.commentShow = "More";
-          })
-          .catch(error => {
-            if (error.response.status === 500) {
-              this.$emit(
-                "snackbarMessage",
-                "Something went wrong during the process", // MSG
-                "red lighten-2"
-              ); // COLOR
-            }
-          });
-      }
-    },
-    closeComment() {
-      this.$refs.commentForm.reset();
-      this.dialog = false;
-    },
-    sendComment() {
-      if (this.$refs.commentForm.validate()) {
-        axios
-          .post(
-            this.backendUrl + "post/" + this.post.id,
-            {
-              content: this.commentContent
-            },
-            {
-              headers: { Authorization: "Bearer " + localStorage.access_token }
-            }
-          )
-          .then(response => {
-            if (response.status === 200) {
-              this.$refs.commentForm.reset();
-              this.dialog = false;
-              if (this.commentShowMore === true) {
-                this.getCommentsInfo(2);
-              } else {
-                this.getCommentsInfo();
-              }
-              this.$emit(
-                "snackbarMessage",
-                "Successfully commented on the post",
-                "success"
-              );
-            }
-          })
-          .catch(error => {
-            if (error.response.status === 500) {
-              this.$emit(
-                "snackbarMessage",
-                "Something went wrong during the process", // MSG
-                "red lighten-2"
-              ); // COLOR
-            }
-          });
-      }
-    },
-    showMoreComments() {
-      this.getCommentsInfo(this.post.comments.length);
-      this.showMoreComments = false;
     }
   }
 };

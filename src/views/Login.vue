@@ -1,80 +1,59 @@
 <template>
-  <v-container grid-list-md>
-    <v-layout row wrap>
-      <v-flex offset-md3 md6 xs12>
-        <v-snackbar
-          v-model="snackbar"
-          top
-          :color="color"
-        >
-        {{ text }}
-        <v-btn
-          flat
-          @click="snackbar = false"
-        >Close</v-btn>
-        </v-snackbar>
-        <v-card class="elevation-5">
-          <v-form ref="loginForm" v-model="valid" lazy-validation>
-            <v-card-title primary-title class="display-1 font-weight-light">
-              Login to Konishi
-            </v-card-title>
-            <v-layout row wrap>
-              <v-card-title>
-                <v-flex xs12>
-                  <v-text-field
-                    label="Username"
-                    prepend-icon="person"
-                    required
+  <section class="hero is-dark is-fullheight">
+    <div class="hero-body">
+      <div class="container has-text-centered">
+        <div class="column is-4 is-offset-4">
+          <h3 class="title has-text-white">Login</h3>
+            <p class="subtitle has-text-white">Please login to proceed.</p>
+            <div class="box mt5">
+              <figure class="avatar">
+                <img src="@/assets/Logo.png">
+              </figure>
+              <div class="mb4 mt1">
+                Zucc can no longer watch.
+              </div>
+              <form ref="loginForm">
+                <b-field custom-class="is-medium" 
+                  :type="errors.has('username') ? 'is-danger': ''"
+                  :message="errors.has('username') ? errors.first('username') : ''"
+                >
+                  <b-input 
+                    @keyup.enter="validate"
+                    name="username"
                     v-model="username"
-                    @keyup.enter="login"
-                    :rules="usernameRules"
-                  >
-                  </v-text-field>
-                </v-flex>
-                <v-flex xs12>
-                  <v-text-field
-                    :append-icon="showPassword ? 'visibility' : 'visibility_off'"
-                    :type="showPassword ? 'text' : 'password'"
-                    :rules="passwordRules"
-                    v-model="password"
-                    prepend-icon="vpn_key"
-                    label="Password"
-                    hint="At least 8 characters"
-                    class="input-group--focused"
-                    @click:append="showPassword = !showPassword"
-                    @keyup.enter="login"
-                    required
-                  ></v-text-field>
-                </v-flex>
-              </v-card-title>
-            </v-layout>
-            <v-card-actions>
-              <v-layout row wrap>
-                <v-flex xs6>
-                  <v-btn 
-                    flat 
-                    block
-                    color="deep-purple lighten-2"
-                    :disabled="!valid"
-                    @click="login"
-                  >
-                    <v-icon>exit_to_app</v-icon>
-                    <div class="ml-1">Login</div>
-                  </v-btn>
-                </v-flex>
-                <v-flex xs6>
-                  <v-btn flat block color="green lighten-1" @click="signup">
-                    <v-icon class="mr-1">beenhere</v-icon>
-                    signup
-                  </v-btn>
-                </v-flex>
-              </v-layout>
-            </v-card-actions>
-          </v-form>
-        </v-card>
-      </v-flex>
-    </v-layout>
-  </v-container>
+                    size="is-medium"
+                    placeholder="Username"
+                    v-validate="'required|min:3|max:15'"
+                   ></b-input>
+                </b-field>
+                <b-field custom-class="is-medium" class="pb3"
+                  :type="errors.has('password') ? 'is-danger': ''"
+                  :message="errors.has('password') ? errors.first('password') : ''"
+                >
+                  <b-input 
+                    @keyup.enter="validate"
+                    type="password" 
+                    name="password"
+                    size="is-medium" 
+                    placeholder="Password"
+                    v-validate="'required|min:8|max:255'"
+                    v-model="passwordContent"
+                    password-reveal></b-input>
+                </b-field>
+              </form>
+              <button 
+                class="button is-block is-danger is-medium is-fullwidth mb2" 
+                @click="validate"
+                :disabled="errors.any()"
+              >Login</button>
+            </div>
+          <router-link to="/signup">
+            <a class="button is-block is-primary is-medium">Sign Up</a>
+          </router-link>
+        </div>
+      </div>
+    </div>
+  </section>
 </template>
 
 <script>
@@ -85,92 +64,78 @@ export default {
   name: "Login",
   data() {
     return {
-      showPassword: false,
-      valid: true,
-      snackbar: false,
-      text: null,
-      color: null,
-      username: null,
-      password: null,
-      usernameRules: [
-        v => !!v || "Username is required",
-        v =>
-          (v && v.length <= 20) || "Username must be less than 20 characters",
-        v => (v && v.length >= 3) || "Username must be more than 3 characters"
-      ],
-      passwordRules: [
-        v =>
-          (v && v.length >= 8) ||
-          "Password must be atleast 8 characters or more"
-      ]
+      username: "",
+      passwordContent: ""
     };
   },
   computed: {
     ...mapState(["backendUrl"])
   },
-  mounted() {
+  beforeMount() {
     this.checkLogin();
   },
   methods: {
+    validate() {
+      this.$validator.validateAll().then(result => {
+        if (result) {
+          this.login();
+        }
+      });
+    },
     login() {
-      if (this.$refs.loginForm.validate()) {
-        axios
-          .post(this.backendUrl + "login", {
-            username: this.username,
-            password: this.password
-          })
-          .then(response => {
-            if (response.data.success == true) {
-              localStorage.access_token = response.data.access_token;
-              this.saveUserInfo();
-              // Redirect user to Home page.
-              this.$router.push({ name: "home" });
-            }
-          })
-          .catch(error => {
-            var status = error.response.status;
-            if (status === 401) {
-              this.snackbar = true;
-              this.text = "Incorrect username or password";
-              this.color = "red lighten-2";
-            } else {
-              this.snackbar = true;
-              this.text = "Incorrect username or password";
-              this.color = "red lighten-2";
-            }
-          });
-      }
-    }, // Login end
-    checkLogin() {
-      if (localStorage.access_token != null) {
-        this.$router.push("/");
-      }
-    },
-    signup() {
-      this.$router.push("/signup");
-    },
-    saveUserInfo() {
       axios
-        .get(this.backendUrl + "currentuser", {
-          headers: {
-            Authorization: "Bearer " + localStorage.access_token
-          }
+        .post(this.backendUrl + "/login", {
+          username: this.username,
+          password: this.passwordContent
         })
         .then(response => {
-          localStorage.setItem(
-            "currentUser",
-            JSON.stringify({
-              username: response.data.username,
-              bio: response.data.bio,
-              email: response.data.email,
-              firstName: response.data.first_name,
-              lastName: response.data.last_name,
-              role: response.data.roles,
-              loggedIn: true
-            })
-          );
+          if (response.status === 200) {
+            // Store the access token
+            localStorage.setItem("access_token", response.data.access_token);
+            // Once saved, get the current user's information
+            this.goHome();
+          }
+        })
+        .catch(error => {
+          if (error.response.status === 404) {
+            this.toast("Incorrect username or password!", "is-danger");
+          } else if (error.response.status === 401) {
+            this.toast("Incorrect username or password!", "is-danger");
+          } else {
+            this.toast("Uh oh! Something went wrong", "is-danger");
+          }
         });
+    },
+    toast(msg, type) {
+      this.$toast.open({
+        duration: 3000,
+        message: msg,
+        type: type
+      });
+    },
+    checkLogin() {
+      if (localStorage.access_token != null) {
+        this.goHome();
+      }
+    },
+    goHome() {
+      this.$router.push("/");
     }
   }
 };
 </script>
+
+<style scoped>
+.avatar {
+  margin-top: -70px;
+  padding-bottom: 20px;
+}
+.avatar img {
+  padding: 5px;
+  background: #fff;
+  border-radius: 50%;
+  -webkit-box-shadow: 0 2px 3px rgba(10, 10, 10, 0.1),
+    0 0 0 1px rgba(10, 10, 10, 0.1);
+  box-shadow: 0 2px 3px rgba(10, 10, 10, 0.1), 0 0 0 1px rgba(10, 10, 10, 0.1);
+}
+</style>

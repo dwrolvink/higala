@@ -1,11 +1,11 @@
 import Vue from "vue";
-import "./plugins/vuetify";
-import "./plugins/simplemarkdown";
+import "./plugins/buefy";
+import VeeValidate from "vee-validate";
 import App from "./App.vue";
 import router from "./router";
 import store from "./store";
-import ReadMore from "vue-read-more";
 
+Vue.use(VeeValidate);
 Vue.config.productionTip = false;
 
 new Vue({
@@ -13,5 +13,3 @@ new Vue({
   store,
   render: h => h(App)
 }).$mount("#app");
-
-Vue.use(ReadMore);

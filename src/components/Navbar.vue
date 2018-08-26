@@ -25,10 +25,7 @@
         @click="showMenu"
       >
         <div class="navbar-end">
-          <a class="navbar-item is-active">
-            Support
-          </a>
-          <a class="navbar-item" @click="contribute">
+          <a class="navbar-item is-active" @click="contribute">
             Contribute
           </a>
         </div>

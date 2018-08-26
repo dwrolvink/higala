@@ -1,5 +1,6 @@
 import Vue from "vue";
 import "./plugins/buefy";
+import "./plugins/simplemarkdown";
 import VeeValidate from "vee-validate";
 import App from "./App.vue";
 import router from "./router";

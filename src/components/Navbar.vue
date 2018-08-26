@@ -31,9 +31,6 @@
           <a class="navbar-item" @click="contribute">
             Contribute
           </a>
-          <a v-if="loggedIn" class="navbar-item" @click="logout">
-            Logout
-          </a>
         </div>
       </div>
     </div>
@@ -46,8 +43,7 @@ export default {
   data() {
     return {
       burgerActive: false,
-      menuActive: false,
-      loggedIn: null
+      menuActive: false
     };
   },
   beforeMount() {
@@ -70,12 +66,6 @@ export default {
     },
     goHome() {
       this.$router.push("/");
-    },
-    logout() {
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("currentuser");
-      this.loggedIn = false;
-      this.$router.push("/login");
     }
   }
 };

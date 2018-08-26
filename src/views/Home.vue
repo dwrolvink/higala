@@ -4,22 +4,26 @@
       <div class="container">
         <div class="columns">
           <div class="column is-3">
-            <Currentuser/>
+            <Currentuser class="has-hover-shadow"/>
           </div>
           <div class="column is-6">
             <div class="mb4">
               <Create
                 v-on:postCreated="updateFeed"
+                class="has-hover-shadow"
               />
             </div>
             <div v-if="posts">
-              <div v-for="(post, index) in posts" :key="index">
-                <Post
-                  :post="post"
-                  :index="index"
-                  v-on:serverError="serverError"
-                />
-              </div>
+              <transition-group enter-active-class="animated fadeInDown" leave-active-class="animated fadeOutRight">
+                <div v-for="(post, index) in posts" :key="post.id">
+                  <Post
+                    :post="post"
+                    :index="index"
+                    v-on:deletePost="deletePost"
+                    v-on:toastMsg="toast"
+                  />
+                </div>
+              </transition-group>
             </div>
             <button class="mt3 button"
               @click="getPostIds"
@@ -117,15 +121,44 @@ export default {
       });
     },
     updateFeed(newpost) {
-      console.log("new POST!")
       this.toast("Post has successfully been created", "is-success");
-      console.log(newpost);
       this.posts.unshift(newpost);
-      console.log(newpost.id)
     },
-    serverError() {
-      this.toast("Something went wrong during the process", "is-danger");
+    deletePost(postId, postIndex) {
+      axios
+        .delete(this.backendUrl + "/post/" + postId, {
+          headers: {
+            Authorization: "Bearer " + localStorage.access_token
+          }
+        })
+        .then(response => {
+          if (response.status === 200) {
+            this.posts.splice(postIndex, 1);
+            this.toast("Post has successfully been deleted!", "is-success");
+          }
+        })
+        .catch(error => {
+          if (error.response.status === 404) {
+            this.toast("404: Post not found!", "is-danger");
+          } else if (error.response.status === 403) {
+            this.toast("You do not own this post...", "is-danger");
+          } else {
+            this.toast("Something went wrong during the process", "is-danger");
+          }
+        });
     }
   }
 };
 </script>
+
+<style scoped>
+@import url("https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css");
+
+.has-hover-shadow {
+  transition: box-shadow 0.3s;
+}
+
+.has-hover-shadow:hover {
+  box-shadow: 0 0 11px rgba(33, 33, 33, 0.2);
+}
+</style>

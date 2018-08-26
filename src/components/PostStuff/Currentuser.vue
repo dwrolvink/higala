@@ -48,6 +48,20 @@
           <button class="button is-danger is-fullwidth">
             Profile
           </button>
+          <b-tooltip
+            position="is-bottom"
+            label="Logout"
+            animated
+            square
+            type="is-dark"
+          >
+            <button class="ml1 button is-light" @click="confirmLogout">
+              <b-icon
+                icon="exit-to-app"
+              >
+              </b-icon>
+            </button>
+          </b-tooltip>
         </a>
     </footer>
   </b-collapse>
@@ -71,11 +85,17 @@ export default {
     ...mapState(["backendUrl"])
   },
   created() {
+    this.checkLogin();
     this.getUserInfo();
     this.checkRole();
     this.prettyDate();
   },
   methods: {
+    checkLogin() {
+      if (localStorage.access_token == null) {
+        this.$router.push("/login");
+      }
+    },
     getUserInfo() {
       if (localStorage.currentuser == null) {
         axios
@@ -91,6 +111,7 @@ export default {
               localStorage.setItem(
                 "currentuser",
                 JSON.stringify({
+                  id: response.data.id,
                   bio: response.data.bio,
                   email: response.data.email,
                   first_name: response.data.first_name,
@@ -132,6 +153,24 @@ export default {
         "MMM Do, YYYY"
       );
       this.joined = joinDate;
+    },
+    logout() {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("currentuser");
+      this.loggedIn = false;
+      this.$router.push("/login");
+    },
+    confirmLogout() {
+      this.$dialog.confirm({
+        title: "Logging out",
+        message: "Are you sure you want to <b>logout</b> of your account?",
+        confirmText: "Logout",
+        type: "is-warning",
+        hasIcon: true,
+        icon: "exit-to-app",
+        cancelText: "Nah",
+        onConfirm: () => this.logout()
+      });
     }
   }
 };

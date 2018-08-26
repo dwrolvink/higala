@@ -73,9 +73,8 @@ export default {
           )
           .then(response => {
             if (response.status === 200) {
-              this.$refs.createForm.reset();
+              this.postContent = "";
               this.$emit("postCreated", response.data.new_post);
-              console.log("I think it emitted properly.")
             }
           })
           .catch(error => {

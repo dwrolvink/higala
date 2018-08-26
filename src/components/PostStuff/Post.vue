@@ -39,7 +39,12 @@
                 :disabled="locked"
                 v-show="owner"
               >Edit</b-dropdown-item>
-              <b-dropdown-item @click="lockPost">Lock</b-dropdown-item>
+              <div v-if="locked">
+                <b-dropdown-item :disabled="!admin" @click="unlockPost">Unlock</b-dropdown-item>
+              </div>
+              <div v-else>
+                <b-dropdown-item @click="lockPost">Lock</b-dropdown-item>
+              </div>
           </b-dropdown>
         </div>
       </div>
@@ -78,7 +83,7 @@
               <span class="ml1">{{ keks }}</span>
             </button>
 
-            <button class="ml2 button is-info">
+            <button class="ml2 button is-info" :disabled="locked">
               <b-icon
                 icon="forum"
                 size="is-small"
@@ -316,16 +321,68 @@ export default {
     },
     lockPost() {
       axios
-        .put(this.backendUrl + " " + this.post.id + "/lock", null, {
-          headers: {
-            Authorization: "Bearer " + localStorage.access_token
+        .put(
+          this.backendUrl + "/post/" + this.post.id + "/lock",
+          {
+            method: "lock"
+          },
+          {
+            headers: {
+              Authorization: "Bearer " + localStorage.access_token
+            }
           }
-        })
+        )
         .then(response => {
           console.log(response);
+          if (response.status === 200) {
+            this.locked = true;
+            this.$emit("toastMsg", "Post has been locked!", "is-warning");
+          }
         })
         .catch(error => {
-          console.log(error);
+          console.log(error.response);
+          if (error.response.data.reason === "locked") {
+            this.$emit("toastMsg", "Post has already been locked.", "is-info");
+          } else if (error.response.data.reason === "owner") {
+            this.$emit("toastMsg", "You do not have permissions.", "is-danger");
+          } else {
+            this.$emit(
+              "toastMsg",
+              "OwO, pwease wait, that was off..",
+              "is-danger"
+            );
+          }
+        });
+    },
+    unlockPost() {
+      axios
+        .put(
+          this.backendUrl + "/post/" + this.post.id + "/lock",
+          {
+            method: "unlock"
+          },
+          {
+            headers: {
+              Authorization: "Bearer " + localStorage.access_token
+            }
+          }
+        )
+        .then(response => {
+          console.log(response);
+          if (response.status === 200) {
+            this.locked = false;
+            this.$emit("toastMsg", "Post has been unlocked!", "is-success");
+          }
+        })
+        .catch(error => {
+          console.log(error)
+          if (error.response.status === 500) {
+            this.$emit(
+              "toastMsg",
+              "Something went wrong during the proccess",
+              "is-danger"
+            );
+          }
         });
     },
     // Short functions

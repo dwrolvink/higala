@@ -125,7 +125,7 @@ export default {
           })
           .catch(error => {
             if (error.response.status === 500) {
-              this.toast("Uh oh! Something went wrong", "is-danger");
+              this.$router.push("/login");
             }
           });
       } else {

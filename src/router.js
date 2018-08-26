@@ -4,6 +4,7 @@ import Home from "./views/Home.vue";
 import Login from "./views/Login.vue";
 import Signup from "./views/Signup.vue";
 import Contribute from "./views/Contribute.vue";
+import NotFound from "./views/NotFound.vue";
 
 Vue.use(Router);
 
@@ -28,6 +29,15 @@ export default new Router({
       path: "/contribute",
       name: "contribute",
       component: Contribute
+    },
+    {
+      path: "/404",
+      name: "404 Page",
+      component: NotFound
+    },
+    {
+      path: "*",
+      redirect: "/404"
     }
   ]
 });

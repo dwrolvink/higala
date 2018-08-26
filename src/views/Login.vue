@@ -18,7 +18,7 @@
                   :message="errors.has('username') ? errors.first('username') : ''"
                 >
                   <b-input 
-                    @keyup.enter="validate"
+                    @keyup.native.enter="validate"
                     name="username"
                     v-model="username"
                     size="is-medium"
@@ -31,7 +31,7 @@
                   :message="errors.has('password') ? errors.first('password') : ''"
                 >
                   <b-input 
-                    @keyup.enter="validate"
+                    @keyup.native.enter="validate"
                     type="password" 
                     name="password"
                     size="is-medium" 

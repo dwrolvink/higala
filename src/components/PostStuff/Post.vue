@@ -106,7 +106,29 @@
             >Edited</b-tag>
           </div>
         </div>
-      </div> <!-- Main component end -->
+      </div> 
+
+      <div class="pr4 pl4 pb3">
+        <Comment/>
+        <Comment/>
+
+        <div class="media">
+          <figure class="media-left">
+            <p class="image is-24x24 mt1">
+              <img src="https://api.adorable.io/avatars/40/sneeze.png">
+            </p>
+          </figure>
+          <div class="media-content">
+            <b-field>
+              <b-input 
+                placeholder="Write a comment..."
+                icon="forum"
+              ></b-input>
+            </b-field>
+          </div>
+        </div>
+      </div>
+      <!-- Main component end -->
 
       <!-- MODALS -->
       <b-modal v-if="post.image_id" :active.sync="isImageModalActive">
@@ -180,6 +202,7 @@ import moment from "moment";
 import truncate from "vue-truncate-collapsed";
 import axios from "axios";
 import { mapState } from "vuex";
+import Comment from "@/components/PostStuff/CommentsReplies/Comment";
 
 export default {
   name: "Post",
@@ -205,7 +228,8 @@ export default {
     };
   },
   components: {
-    truncate
+    truncate,
+    Comment
   },
   created() {
     this.amountOfKeks();
@@ -375,7 +399,7 @@ export default {
           }
         })
         .catch(error => {
-          console.log(error)
+          console.log(error);
           if (error.response.status === 500) {
             this.$emit(
               "toastMsg",

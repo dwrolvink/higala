@@ -23,7 +23,7 @@
                     v-model="username"
                     size="is-medium"
                     placeholder="Username"
-                    v-validate="'required|min:3|max:15'"
+                    v-validate="'required|min:3|max:15|alpha_num'"
                    ></b-input>
                 </b-field>
                 <b-field custom-class="is-medium" class="pb3"

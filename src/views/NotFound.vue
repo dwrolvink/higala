@@ -24,7 +24,7 @@ export default {
   name: "NotFound",
   methods: {
     OwO() {
-      this.$router.push("/")
+      this.$router.push("/");
     }
   }
 };

@@ -109,8 +109,10 @@
       </div> 
 
       <div class="pr4 pl4 pb3">
-        <Comment/>
-        <Comment/>
+        <div v-if="post.comments" class="mb3">
+          <Comment/>
+          <Comment/>
+        </div>
 
         <div class="media">
           <figure class="media-left">
@@ -202,7 +204,7 @@ import moment from "moment";
 import truncate from "vue-truncate-collapsed";
 import axios from "axios";
 import { mapState } from "vuex";
-import Comment from "@/components/PostStuff/CommentsReplies/Comment";
+import Comment from "@/components/PostStuff/CommentReply/Comment";
 
 export default {
   name: "Post",
@@ -409,9 +411,32 @@ export default {
           }
         });
     },
+    getCommentsInfo() {
+      axios
+        .post(
+          this.backendUrl + "/postcomments",
+          {
+            comment_ids: this.post.comments
+          },
+          {
+            headers: {
+              Authorization: "Bearer " + localStorage.access_token
+            }
+          }
+        )
+        .then(response => {
+          if (response.status === 200) {
+            console.log("Yeet")
+          }
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    },
     // Short functions
     amountOfComments() {
       this.comments = this.post.comments.length;
+      this.getCommentsInfo();
     },
     deletePost() {
       this.$emit("deletePost", this.post.id, this.index);

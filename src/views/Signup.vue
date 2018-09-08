@@ -120,7 +120,7 @@
                                   icon="account" 
                                   maxlength="15"
                                   v-model="username"
-                                  v-validate="'required|min:4|max:15'"
+                                  v-validate="'required|min:4|max:15|alpha_num'"
                                 ></b-input>
                               </b-field>
                             </div>
@@ -137,21 +137,21 @@
                                   icon="alphabetical" 
                                   maxlength="20"
                                   v-model="firstName"
-                                  v-validate="'min:2|max:25'"
+                                  v-validate="'min:2|max:25|alpha'"
                                 ></b-input>
                               </b-field>
                             </div>
                             <div class="column">
                               <b-field label="Last Name"
-                                :type="errors.has('lastName') ? 'is-danger' : 'is-warning'" 
-                                :message="errors.has('lastName') ? errors.first('lastName') : 'Optional'"
+                                :type="errors.has('last name') ? 'is-danger' : 'is-warning'" 
+                                :message="errors.has('last name') ? errors.first('last name') : 'Optional'"
                               >
                                 <b-input 
-                                  name="lastName"
+                                  name="last name"
                                   icon="sort-alphabetical" 
                                   maxlength="25"
                                   v-model="lastName"
-                                  v-validate="'min:2|max:25'"
+                                  v-validate="'min:2|max:25|alpha'"
                                 ></b-input>
                               </b-field>
                             </div>

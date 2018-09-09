@@ -1,5 +1,5 @@
 <template>
-  <article class="media">
+  <article class="media mb3">
     <figure class="media-left">
       <p class="image is-32x32">
         <img src="https://api.adorable.io/avatars/40/commenter.png">
@@ -8,14 +8,21 @@
     <div class="media-content">
       <div class="content">
         <p>
-          <strong>BabuVandesh20</strong> <small class="ml2">31m</small>
+          <strong>{{ comment.commenter }}</strong> <small class="ml2">{{ created }}</small>
           <br>
           <span class="f6 has-text-grey">
-            <truncate clamp="..." 
-              :length="90" 
-              less="Show less"
-              text="Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quisquam consequatur facilis, nostrum fugiat impedit veniam fugit id consequuntur inventore sunt."
-            ></truncate>
+            <div v-if="normalView">
+              <truncate clamp="..." 
+                :length="90" 
+                less="Show less"
+                :text="comment.content"
+              ></truncate>
+            </div>
+            <div v-else>
+              <vue-simple-markdown
+                :source="comment.content">
+              </vue-simple-markdown>
+            </div>
           </span>
         </p>
       </div>
@@ -34,13 +41,13 @@
               <span>WIP</span>
             </button>
           </a>
-        </div>
-        <div class="level-right">
           <a class="level-item">
-            <button class="button is-small">
+            <button class="button is-small" @click="toggleView">
               <b-icon icon="markdown"></b-icon>
             </button>
           </a>
+        </div>
+        <div class="level-right">
           <a class="level-item">
             <button class="button is-small is-rounded">
               <b-icon icon="chevron-down"></b-icon>
@@ -54,16 +61,27 @@
 
 <script>
 import truncate from "vue-truncate-collapsed";
+import moment from "moment";
+import { mapState } from "vuex";
+import axios from "axios";
+
 export default {
   name: "Comment",
+  props: ["comment", "index"],
   components: {
     truncate
   },
   data() {
     return {
       amountOfLikes: 0,
-      liked: false
+      liked: false,
+      created: "",
+      normalView: true
     };
+  },
+  created() {
+    this.prettifyDate();
+    this.checkLikesAmount();
   },
   methods: {
     likeComment() {
@@ -74,6 +92,18 @@ export default {
         this.liked = true;
         this.amountOfLikes = this.amountOfLikes + 1;
       }
+    },
+    prettifyDate() {
+      var created = moment(this.comment.created).fromNow();
+      this.created = created;
+    },
+    checkLikesAmount() {
+      console.log(this.comment);
+      var likeAmounts = this.comment.likes.length;
+      this.amountOfLikes = likeAmounts;
+    },
+    toggleView() {
+      this.normalView = !this.normalView;
     }
   }
 };

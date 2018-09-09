@@ -110,8 +110,12 @@
 
       <div class="pr4 pl4 pb3">
         <div v-if="post.comments" class="mb3">
-          <Comment/>
-          <Comment/>
+          <div v-for="(comment, index) in comments_info" :key="comment.id">
+            <Comment 
+              :comment="comment" 
+              :index="index"
+            />
+          </div>
         </div>
 
         <div class="media">
@@ -124,7 +128,8 @@
             <b-field>
               <b-input 
                 placeholder="Write a comment..."
-                icon="forum"
+                type="textarea"
+                rows="1"
               ></b-input>
             </b-field>
           </div>
@@ -226,7 +231,8 @@ export default {
       editModalActive: false,
       editPost: this.post.content,
       edited: false,
-      locked: false
+      locked: false,
+      comments_info: null
     };
   },
   components: {
@@ -426,7 +432,7 @@ export default {
         )
         .then(response => {
           if (response.status === 200) {
-            console.log("Yeet")
+            this.comments_info = response.data.comments;
           }
         })
         .catch(error => {
@@ -436,7 +442,9 @@ export default {
     // Short functions
     amountOfComments() {
       this.comments = this.post.comments.length;
-      this.getCommentsInfo();
+      if (this.post.comments.length > 0) {
+        this.getCommentsInfo();
+      }
     },
     deletePost() {
       this.$emit("deletePost", this.post.id, this.index);

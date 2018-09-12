@@ -29,7 +29,9 @@
       <nav class="level is-mobile">
         <div class="level-left">
           <a class="level-item">
-            <button :class="['button', 'is-small', liked? 'is-dark': '']" @click="likeComment">
+            <button :class="['button', 'is-small', liked? 'is-dark': '']" 
+              v-on="{click: liked? unlikeComment: likeComment}"
+            >
               <b-icon icon="thumb-up" size="is-small"></b-icon>
               <span>{{ amountOfLikes }}</span>
             </button>
@@ -71,6 +73,9 @@ export default {
   components: {
     truncate
   },
+  computed: {
+    ...mapState(["backendUrl"])
+  },
   data() {
     return {
       amountOfLikes: 0,
@@ -85,20 +90,56 @@ export default {
   },
   methods: {
     likeComment() {
-      if (this.liked) {
-        this.liked = false;
-        this.amountOfLikes = this.amountOfLikes - 1;
-      } else {
-        this.liked = true;
-        this.amountOfLikes = this.amountOfLikes + 1;
-      }
+      axios
+        .post(this.backendUrl + "/comment/" + this.comment.id + "/like", null, {
+          headers: {
+            Authorization: "Bearer " + localStorage.access_token
+          }
+        })
+        .then(response => {
+          if (response.status === 201) {
+            this.liked = true;
+            this.amountOfLikes = this.amountOfLikes + 1;
+          }
+        })
+        .catch(error => {
+          if (error.response.status === 403) {
+            console.log("Something went wrong during the liking process.")
+          }
+        })
+    },
+    unlikeComment() {
+      axios
+        .delete(this.backendUrl + "/comment/" + this.comment.id + "/like", {
+          headers: {
+            Authorization: "Bearer " + localStorage.access_token
+          }
+        })
+        .then(response => {
+          if (response.status === 200) {
+            this.liked = false;
+            this.amountOfLikes = this.amountOfLikes - 1;
+          }
+        })
+        .catch(error => {
+          if (error.response.status === 500) {
+            console.log("Sumting went wong during the pwocess");
+            // this.$emit(
+            //   "toastMsg",
+            //   "Something went wrong during the process",
+            //   "is-danger"
+            // );
+          }
+        });
     },
     prettifyDate() {
       var created = moment(this.comment.created).fromNow();
       this.created = created;
     },
     checkLikesAmount() {
-      console.log(this.comment);
+      if (this.comment.liked === true) {
+        this.liked = true;
+      }
       var likeAmounts = this.comment.likes.length;
       this.amountOfLikes = likeAmounts;
     },

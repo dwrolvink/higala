@@ -118,22 +118,30 @@
           </div>
         </div>
 
-        <div class="media">
+        <!-- <div class="media">
           <figure class="media-left">
             <p class="image is-24x24 mt1">
               <img src="https://api.adorable.io/avatars/40/sneeze.png">
             </p>
           </figure>
           <div class="media-content">
-            <b-field>
+            <b-field 
+              :type="errors.has('comment') ? 'is-danger' : ''"
+              :message="errors.has('comment') ? errors.first('comment') : ''"
+            >
               <b-input 
+                name="comment"
+                v-model="commentContent"
+                v-validate="'max:1000'"
+                maxlength="1000"
                 placeholder="Write a comment..."
                 type="textarea"
                 rows="1"
               ></b-input>
             </b-field>
           </div>
-        </div>
+        </div> -->
+
       </div>
       <!-- Main component end -->
 
@@ -232,7 +240,8 @@ export default {
       editPost: this.post.content,
       edited: false,
       locked: false,
-      comments_info: null
+      comments_info: null,
+      commentContent: ""
     };
   },
   components: {
@@ -438,6 +447,12 @@ export default {
         .catch(error => {
           console.log(error);
         });
+    },
+    validateComment() {
+      if (this.commentContent !== "") {
+        console.log(this.commentContent)
+        this.commentContent = ""
+      }
     },
     // Short functions
     amountOfComments() {

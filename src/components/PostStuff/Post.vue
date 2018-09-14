@@ -83,7 +83,10 @@
               <span class="ml1">{{ keks }}</span>
             </button>
 
-            <button class="ml2 button is-info" :disabled="locked">
+            <button class="ml2 button is-info" 
+              :disabled="locked"
+              @click="commentModalActive = true"
+            >
               <b-icon
                 icon="forum"
                 size="is-small"
@@ -108,50 +111,25 @@
         </div>
       </div> 
 
-      <div class="pr4 pl4 pb3">
-        <div v-if="post.comments" class="mb3">
-          <div v-for="(comment, index) in comments_info" :key="comment.id">
-            <Comment 
-              :comment="comment" 
-              :index="index"
-            />
-          </div>
+      <div v-if="post.comments" class="pr4 pl4 pb3 mb3">
+        <div v-for="(comment, index) in comments_info" :key="comment.id">
+          <Comment 
+            :comment="comment" 
+            :index="index"
+          />
         </div>
-
-        <!-- <div class="media">
-          <figure class="media-left">
-            <p class="image is-24x24 mt1">
-              <img src="https://api.adorable.io/avatars/40/sneeze.png">
-            </p>
-          </figure>
-          <div class="media-content">
-            <b-field 
-              :type="errors.has('comment') ? 'is-danger' : ''"
-              :message="errors.has('comment') ? errors.first('comment') : ''"
-            >
-              <b-input 
-                name="comment"
-                v-model="commentContent"
-                v-validate="'max:1000'"
-                maxlength="1000"
-                placeholder="Write a comment..."
-                type="textarea"
-                rows="1"
-              ></b-input>
-            </b-field>
-          </div>
-        </div> -->
-
       </div>
       <!-- Main component end -->
 
       <!-- MODALS -->
+      <!-- Image Modal -->
       <b-modal v-if="post.image_id" :active.sync="isImageModalActive">
           <p class="image is-4by3">
               <img :src="imageSrc">
           </p>
-      </b-modal>
+      </b-modal> <!-- Image Modal end-->
 
+      <!-- Edit Modal -->
       <b-modal 
         :active.sync="editModalActive" 
         :width="640" 
@@ -207,8 +185,65 @@
         <footer class="modal-card-foot">
           <button class="button is-primary" @click="updatePost">Update</button>
         </footer>
-      </b-modal>
+      </b-modal> <!-- Edit Modal end -->
 
+      <!-- Commenting modal -->
+      <b-modal 
+        :active.sync="commentModalActive" 
+        :width="640" 
+        scroll="keep" 
+        :onCancel="resetEdit"
+        :canCancel="['x']"
+      >
+        <article class="card">
+          <div class="card-content">
+            <div class="media">
+              <div class="media-left">
+                <figure class="image is-48x48">
+                  <img src="https://api.adorable.io/avatars/64/abott@adorable.png"/>
+                </figure>
+              </div>
+              <div class="media-content">
+                <p class="title is-4 has-text-dark has-text-weight-light">{{ post.creator_name }}</p>
+                <p class="subtitle is-6 has-text-grey">{{ creationDate }}</p>
+              </div>
+              <div class="media-right">
+                <button class="button is-small mr1">
+                  <b-icon icon="markdown"></b-icon>
+                </button>
+                <button class="button is-small ml1">
+                  <b-icon icon="dots-vertical"></b-icon>
+                </button>
+              </div>
+            </div>
+
+            <div class="content">
+              <truncate clamp="..." 
+                :length="477" 
+                less="Show less"
+                :text="editPost"
+              ></truncate>
+            </div>
+
+            <b-field label="Comment on post"
+              :type="errors.has('editpost') ? 'is-danger' : ''"
+              :message="errors.has('editpost') ? errors.first('editpost') : ''"
+            >
+              <b-input 
+                name="post"
+                type="textarea" 
+                maxlength="1500" 
+                rows="1"
+                v-model="commentContent"
+                v-validate="'max:1500'"
+              ></b-input>
+            </b-field>
+          </div>
+        </article>
+        <footer class="modal-card-foot">
+          <button class="button is-primary" @click="validateComment">Comment</button>
+        </footer>
+      </b-modal> 
   </article>
 </template>
 
@@ -237,10 +272,11 @@ export default {
       admin: false,
       normalView: true,
       editModalActive: false,
+      commentModalActive: false,
       editPost: this.post.content,
       edited: false,
       locked: false,
-      comments_info: null,
+      comments_info: [],
       commentContent: ""
     };
   },
@@ -263,6 +299,8 @@ export default {
       if (this.post.creator_name === currentuser.username) {
         this.owner = true;
       } else if (currentuser.roles[0] === 1) {
+        // This is a client side validation,
+        // There's a server side validation too.
         this.admin = true;
       }
     },
@@ -445,16 +483,49 @@ export default {
           }
         })
         .catch(error => {
-          console.log(error);
+          if (error.response.status === 500) {
+            this.$emit(
+              "toastMsg",
+              "Something went wrong during the process",
+              "is-danger"
+            );
+          }
         });
     },
-    validateComment() {
-      if (this.commentContent !== "") {
-        console.log(this.commentContent)
-        this.commentContent = ""
-      }
+    commentOnPost() {
+      axios
+        .post(
+          this.backendUrl + "/post/" + this.post.id + "/comments",
+          {
+            content: this.commentContent
+          },
+          {
+            headers: {
+              Authorization: "Bearer " + localStorage.access_token
+            }
+          }
+        )
+        .then(response => {
+          if (response.data.success === true) {
+            // Add the comment
+            let new_comment = response.data.new_comment;
+            this.comments_info.push(new_comment);
+          }
+        })
+        .catch(error => {
+          if (error.response.status === 403) {
+            console.log("Post is locked!");
+          }
+        });
     },
     // Short functions
+    validateComment() {
+      if (this.commentContent !== "") {
+        this.commentOnPost();
+        this.commentContent = "";
+        this.commentModalActive = false;
+      }
+    },
     amountOfComments() {
       this.comments = this.post.comments.length;
       if (this.post.comments.length > 0) {

@@ -12,7 +12,8 @@
           <br>
           <span class="f6 has-text-grey">
             <div v-if="normalView">
-              <truncate clamp="..." 
+              <truncate 
+                clamp="..." 
                 :length="90" 
                 less="Show less"
                 :text="comment.content"
@@ -104,9 +105,9 @@ export default {
         })
         .catch(error => {
           if (error.response.status === 403) {
-            console.log("Something went wrong during the liking process.")
+            console.log("Something went wrong during the liking process.");
           }
-        })
+        });
     },
     unlikeComment() {
       axios

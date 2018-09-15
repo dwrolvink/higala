@@ -102,12 +102,12 @@ export default {
             this.liked = true;
             this.amountOfLikes = this.amountOfLikes + 1;
           }
-        })
-        .catch(error => {
-          if (error.response.status === 403) {
-            console.log("Something went wrong during the liking process.");
-          }
         });
+      // .catch(error => {
+      //   if (error.response.status === 403) {
+      //     console.log("Something went wrong during the liking process.");
+      //   }
+      // });
     },
     unlikeComment() {
       axios
@@ -121,17 +121,17 @@ export default {
             this.liked = false;
             this.amountOfLikes = this.amountOfLikes - 1;
           }
-        })
-        .catch(error => {
-          if (error.response.status === 500) {
-            console.log("Sumting went wong during the pwocess");
-            // this.$emit(
-            //   "toastMsg",
-            //   "Something went wrong during the process",
-            //   "is-danger"
-            // );
-          }
         });
+      // .catch(error => {
+      //   if (error.response.status === 500) {
+      //     console.log("Sumting went wong during the pwocess");
+      //     // this.$emit(
+      //     //   "toastMsg",
+      //     //   "Something went wrong during the process",
+      //     //   "is-danger"
+      //     // );
+      //   }
+      // });
     },
     prettifyDate() {
       var created = moment(this.comment.created).fromNow();

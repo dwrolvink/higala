@@ -65,9 +65,9 @@
       </div>
     </div>
 
-      <div v-if="post.image_id">
+      <div v-if="post.image_file">
         <div class="card-image" @click="isImageModalActive = true">
-          <figure class="image is-4by3">
+          <figure class="image">
             <img :src="imageSrc" alt="Placeholder image">
           </figure>
         </div>
@@ -123,8 +123,8 @@
 
       <!-- MODALS -->
       <!-- Image Modal -->
-      <b-modal v-if="post.image_id" :active.sync="isImageModalActive">
-          <p class="image is-4by3">
+      <b-modal v-if="post.image_file" :active.sync="isImageModalActive">
+          <p class="image">
               <img :src="imageSrc">
           </p>
       </b-modal> <!-- Image Modal end-->
@@ -267,7 +267,7 @@ export default {
       comments: 0,
       isImageModalActive: false,
       creationDate: "",
-      imageSrc: "https://source.unsplash.com/1280x720/?nature,water",
+      imageSrc: "",
       owner: false,
       admin: false,
       normalView: true,
@@ -287,6 +287,7 @@ export default {
   created() {
     this.amountOfKeks();
     this.amountOfComments();
+    this.getImageUrl();
     this.checkEdit();
     this.prettifyDate();
     this.checkOwner();
@@ -412,14 +413,12 @@ export default {
           }
         )
         .then(response => {
-          console.log(response);
           if (response.status === 200) {
             this.locked = true;
             this.$emit("toastMsg", "Post has been locked!", "is-warning");
           }
         })
         .catch(error => {
-          console.log(error.response);
           if (error.response.data.reason === "locked") {
             this.$emit("toastMsg", "Post has already been locked.", "is-info");
           } else if (error.response.data.reason === "owner") {
@@ -447,14 +446,12 @@ export default {
           }
         )
         .then(response => {
-          console.log(response);
           if (response.status === 200) {
             this.locked = false;
             this.$emit("toastMsg", "Post has been unlocked!", "is-success");
           }
         })
         .catch(error => {
-          console.log(error);
           if (error.response.status === 500) {
             this.$emit(
               "toastMsg",
@@ -509,14 +506,20 @@ export default {
           if (response.data.success === true) {
             // Add the comment
             let new_comment = response.data.new_comment;
+            this.amountOfComments = this.amountOfComments + 1;
             this.comments_info.push(new_comment);
           }
         })
         .catch(error => {
           if (error.response.status === 403) {
-            console.log("Post is locked!");
+            this.$emit("toastMsg", "Post is locked!", "is-danger");
           }
         });
+    },
+    getImageUrl() {
+      if (this.post.image_url) {
+        this.imageSrc = this.backendUrl + "/" + this.post.image_url;
+      }
     },
     // Short functions
     validateComment() {

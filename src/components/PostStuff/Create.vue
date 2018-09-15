@@ -32,11 +32,51 @@
         >Post</button>
       </div>
       <div class="column is-2">
-        <button class="button is-info is-fullwidth is-rounded">
+        <button class="button is-info is-fullwidth is-rounded"
+          @click="imageUploadModal = true"
+        >
           <b-icon icon="image"></b-icon>
         </button>
       </div>
     </div>
+
+    <!-- Modal Area -->
+    <b-modal :active.sync="imageUploadModal" :width="640" scroll="keep">
+      <div class="card">
+        <header class="card-header">
+          <p class="card-header-title is-size-4">
+            Upload an image
+            <span class="ml2">
+              <b-icon icon="file-image"></b-icon>
+            </span>
+          </p>
+        </header>
+        <div class="card-content">
+          <div class="columns is-centered">
+            <div class="column is-half">
+              <b-upload
+                drag-drop
+              >
+                <section class="section">
+                  <div class="content has-text-centered">
+                    <p>
+                      <b-icon
+                        icon="upload"
+                        size="is-large"
+                      >
+                      </b-icon>
+                    </p>
+                    <p>
+                      Drop your image here or click to upload
+                    </p>
+                  </div>
+                </section>
+              </b-upload>
+            </div>
+          </div>
+        </div>
+      </div>
+    </b-modal>
   </div>
 </template>
 
@@ -47,7 +87,8 @@ export default {
   name: "Create",
   data() {
     return {
-      postContent: ""
+      postContent: "",
+      imageUploadModal: false
     };
   },
   computed: {

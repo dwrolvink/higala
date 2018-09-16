@@ -46,32 +46,45 @@
         <header class="card-header">
           <p class="card-header-title is-size-4">
             Upload an image
-            <span class="ml2">
-              <b-icon icon="file-image"></b-icon>
-            </span>
           </p>
         </header>
         <div class="card-content">
-          <div class="columns is-centered">
+          <div class="columns is-centered is-mobile">
             <div class="column is-half">
-              <b-upload
-                drag-drop
-              >
-                <section class="section">
-                  <div class="content has-text-centered">
-                    <p>
-                      <b-icon
-                        icon="upload"
-                        size="is-large"
-                      >
-                      </b-icon>
-                    </p>
-                    <p>
-                      Drop your image here or click to upload
-                    </p>
-                  </div>
-                </section>
-              </b-upload>
+              <b-field type="is-danger">
+                <b-upload
+                  drag-drop
+                  v-model="imageFile"
+                >
+                  <section class="section">
+                    <div class="content has-text-centered">
+                      <p>
+                        <b-icon
+                          icon="upload"
+                          size="is-large"
+                        >
+                        </b-icon>
+                      </p>
+                      <p>
+                        Drop your image here or click to upload
+                      </p>
+                    </div>
+                  </section>
+                </b-upload>
+              </b-field>
+
+              <div class="tags">
+                <span v-for="(file, index) in imageFile" 
+                  :key="index"
+                  class="tag is-primary is-large"
+                >{{ file.name }}
+                  <button 
+                    class="delete is-small"
+                    type="button"
+                    @click="removeImage(index)"
+                  ></button>
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -88,7 +101,8 @@ export default {
   data() {
     return {
       postContent: "",
-      imageUploadModal: false
+      imageUploadModal: false,
+      imageFile: []
     };
   },
   computed: {
@@ -134,6 +148,9 @@ export default {
         message: msg,
         type: type
       });
+    },
+    removeImage(index) {
+      this.imageFile.splice(index, 1);
     }
   }
 };

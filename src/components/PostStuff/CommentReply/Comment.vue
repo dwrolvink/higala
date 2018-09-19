@@ -2,7 +2,7 @@
   <article class="media mb3">
     <figure class="media-left">
       <p class="image is-32x32">
-        <img src="https://api.adorable.io/avatars/40/commenter.png">
+        <img src="@/assets/Avatars/CommentAvatar.png">
       </p>
     </figure>
     <div class="media-content">

@@ -152,8 +152,6 @@ export default {
 </script>
 
 <style scoped>
-@import url("https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css");
-
 .has-hover-shadow {
   transition: box-shadow 0.3s;
 }

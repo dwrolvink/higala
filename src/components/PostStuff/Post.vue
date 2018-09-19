@@ -4,7 +4,7 @@
       <div class="media">
         <div class="media-left">
           <figure class="image is-64x64">
-            <img src="https://api.adorable.io/avatars/64/abott@adorable.png"/>
+            <img src="@/assets/Avatars/Penguin_64x64.png"/>
           </figure>
         </div>
         <div class="media-content">
@@ -461,12 +461,15 @@ export default {
           }
         });
     },
-    getCommentsInfo() {
+    getInitialComments() {
+      this.comments_info = this.post.initial_comments;
+    },
+    getMoreComments() {
       axios
         .post(
           this.backendUrl + "/postcomments",
           {
-            comment_ids: this.post.comments
+            comment_ids: this.post.comments.slice(5)
           },
           {
             headers: {
@@ -476,7 +479,7 @@ export default {
         )
         .then(response => {
           if (response.status === 200) {
-            this.comments_info = response.data.comments;
+            this.comments_info.push(response.data.comments);
           }
         })
         .catch(error => {
@@ -532,7 +535,7 @@ export default {
     amountOfComments() {
       this.comments = this.post.comments.length;
       if (this.post.comments.length > 0) {
-        this.getCommentsInfo();
+        this.getInitialComments();
       }
     },
     deletePost() {

@@ -2,7 +2,7 @@
   <article class="media mb3">
     <figure class="media-left">
       <p class="image is-32x32">
-        <img src="@/assets/Avatars/CommentAvatar.png">
+        <img src="@/assets/Avatars/Comment.png">
       </p>
     </figure>
     <div class="media-content">
@@ -11,6 +11,7 @@
           <strong>{{ comment.commenter }}</strong> <small class="ml2">{{ created }}</small>
           <br>
           <span class="f6 has-text-grey">
+
             <div v-if="normalView">
               <truncate 
                 clamp="..." 
@@ -19,11 +20,14 @@
                 :text="comment.content"
               ></truncate>
             </div>
+
             <div v-else>
-              <vue-simple-markdown
-                :source="comment.content">
+              <vue-simple-markdown 
+                :source="comment.content"
+              >
               </vue-simple-markdown>
             </div>
+
           </span>
         </p>
       </div>
@@ -51,10 +55,14 @@
           </a>
         </div>
         <div class="level-right">
-          <a class="level-item">
-            <button class="button is-small is-rounded">
-              <b-icon icon="chevron-down"></b-icon>
-            </button>
+          <a class="level-item" v-show="owner">
+            <b-dropdown>
+              <button class="button is-small is-rounded" slot="trigger">
+                <b-icon icon="chevron-down"></b-icon>
+              </button>
+
+              <b-dropdown-item @click="deletePrompt">Delete Comment</b-dropdown-item>
+            </b-dropdown>
           </a>
         </div>
       </nav>
@@ -82,12 +90,14 @@ export default {
       amountOfLikes: 0,
       liked: false,
       created: "",
-      normalView: true
+      normalView: true,
+      owner: false
     };
   },
   created() {
     this.prettifyDate();
     this.checkLikesAmount();
+    this.checkOwner();
   },
   methods: {
     likeComment() {
@@ -103,11 +113,6 @@ export default {
             this.amountOfLikes = this.amountOfLikes + 1;
           }
         });
-      // .catch(error => {
-      //   if (error.response.status === 403) {
-      //     console.log("Something went wrong during the liking process.");
-      //   }
-      // });
     },
     unlikeComment() {
       axios
@@ -122,16 +127,6 @@ export default {
             this.amountOfLikes = this.amountOfLikes - 1;
           }
         });
-      // .catch(error => {
-      //   if (error.response.status === 500) {
-      //     console.log("Sumting went wong during the pwocess");
-      //     // this.$emit(
-      //     //   "toastMsg",
-      //     //   "Something went wrong during the process",
-      //     //   "is-danger"
-      //     // );
-      //   }
-      // });
     },
     prettifyDate() {
       var created = moment(this.comment.created).fromNow();
@@ -146,6 +141,26 @@ export default {
     },
     toggleView() {
       this.normalView = !this.normalView;
+    },
+    checkOwner() {
+      var currentUser = JSON.parse(localStorage.getItem("currentuser"));
+      if (this.comment.commenter === currentUser.username) {
+        this.owner = true;
+      }
+    },
+    deleteComment() {
+      this.$emit("deleteComment", this.comment.id, this.index);
+    },
+    deletePrompt() {
+      this.$dialog.confirm({
+        title: "Delete comment?",
+        message: "Are you sure you want to delete this comment?",
+        confirmText: "Delete",
+        cancelText: "Cancel",
+        type: "is-danger",
+        hasIcon: true,
+        onConfirm: () => this.deleteComment()
+      });
     }
   }
 };

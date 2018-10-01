@@ -1,6 +1,7 @@
 <template>
   <b-collapse class="card">
     <div slot="trigger" slot-scope="props" class="card-header">
+
       <p class="card-header-title">
         <span v-if="currentuser.first_name && currentuser.last_name">
           {{ currentuser.first_name }} {{ currentuser.last_name }}
@@ -14,7 +15,7 @@
             square
             animated>
             <b-icon
-              icon="verified"
+              icon="star-circle"
               size="is-small"
             >
             </b-icon>
@@ -23,7 +24,7 @@
       </p>
       <a class="card-header-icon">
         <b-icon
-            :icon="props.open ? 'menu-down' : 'menu-up'">
+            :icon="props.open ? 'menu-up' : 'menu-down'">
         </b-icon>
       </a>
     </div>
@@ -65,6 +66,7 @@
         </a>
     </footer>
   </b-collapse>
+
 </template>
 
 <script>

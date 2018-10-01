@@ -5,6 +5,7 @@
         <div class="columns">
           <div class="column is-3">
             <Currentuser class="has-hover-shadow"/>
+            <Saturday class="mt3"/>
           </div>
           <div class="column is-6">
             <div class="mb4">
@@ -42,13 +43,15 @@ import { mapState } from "vuex";
 import Currentuser from "@/components/PostStuff/Currentuser";
 import Create from "@/components/PostStuff/Create";
 import Post from "@/components/PostStuff/Post";
+import Saturday from "@/components/Saturday.vue";
 
 export default {
   name: "home",
   components: {
     Currentuser,
     Create,
-    Post
+    Post,
+    Saturday
   },
   data() {
     return {

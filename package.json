@@ -9,10 +9,11 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
+    "babel-runtime": "^6.26.0",
     "buefy": "^0.6.6",
-    "highlightjs": "^9.10.0",
     "i": "^0.3.6",
     "moment": "^2.22.2",
+    "moment-timezone": "^0.5.21",
     "vee-validate": "^2.1.0-beta.8",
     "vue": "^2.5.17",
     "vue-router": "^3.0.1",

@@ -1,4 +1,4 @@
-# carter
+# Higala
 
 ## Project setup
 ```
@@ -19,3 +19,7 @@ npm run build
 ```
 npm run lint
 ```
+
+### Setting up the frontend
+
+**The Frontend will not work without the backend running, make sure you've set it up and have it running.**

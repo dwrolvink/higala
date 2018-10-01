@@ -1,10 +1,10 @@
 <template>
-  <article class="card mb3">
+  <article class="card mb4">
     <div class="card-content">
       <div class="media">
         <div class="media-left">
           <figure class="image is-64x64">
-            <img src="@/assets/Avatars/Penguin_64x64.png"/>
+            <img src="@/assets/Avatars/Main.png"/>
           </figure>
         </div>
         <div class="media-content">
@@ -59,7 +59,8 @@
         </div>
         <div v-else>
           <vue-simple-markdown 
-            :source="post.content">
+            :source="post.content"
+          >
           </vue-simple-markdown>
         </div>
       </div>
@@ -73,7 +74,8 @@
         </div>
       </div>
 
-      <div class="mt3 pr3 pl3 pb3">
+      <div class="mt3 pr3 pl3">
+
         <div class="level is-mobile">
           <div class="level-left">
             <button :class="['button', kekGiven? 'is-dark' : '']" 
@@ -85,7 +87,7 @@
 
             <button class="ml2 button is-info" 
               :disabled="locked"
-              @click="commentModalActive = true"
+              @click="focusComment"
             >
               <b-icon
                 icon="forum"
@@ -111,13 +113,55 @@
         </div>
       </div> 
 
-      <div v-if="post.comments" class="pr4 pl4 pb3 mb3">
+      <div v-if="post.comments" class="pr4 pl4 pb3">
+        <hr/>
         <div v-for="(comment, index) in comments_info" :key="comment.id">
           <Comment 
             :comment="comment" 
             :index="index"
+            v-on:deleteComment="deleteComment"
           />
         </div>
+      </div>
+
+      <div class="pr3 pl3">
+        <div class="columns is-mobile">
+          <div class="column is-10">
+            <b-field>
+              <b-input 
+                name="comment field"
+                type="textarea"
+                ref="commentField"
+                rows="1"
+                maxlength="1500"
+                v-model="commentContent"
+                v-validate="'max:1500'"
+                :placeholder="['Comment on' +' '+ this.post.creator_name + '\'s' + ' post...']"
+              ></b-input>
+            </b-field>
+          </div>
+
+          <div class="column is-2">
+            <button class="button is-fullwidth is-small is-rounded is-info" disabled>
+              <b-icon
+                icon="image"
+              >
+              </b-icon>
+            </button>
+
+            <button 
+              class="button is-fullwidth mt2 is-small is-rounded is-success"
+              @click="validateComment"
+            >
+              <b-icon
+                icon="send"
+              >
+              </b-icon>
+            </button>
+
+          </div>
+        </div>
+
       </div>
       <!-- Main component end -->
 
@@ -172,7 +216,7 @@
               :message="errors.has('editpost') ? errors.first('editpost') : ''"
             >
               <b-input 
-                name="post"
+                name="editpost"
                 type="textarea" 
                 maxlength="1500" 
                 rows="1"
@@ -187,63 +231,6 @@
         </footer>
       </b-modal> <!-- Edit Modal end -->
 
-      <!-- Commenting modal -->
-      <b-modal 
-        :active.sync="commentModalActive" 
-        :width="640" 
-        scroll="keep" 
-        :onCancel="resetEdit"
-        :canCancel="['x']"
-      >
-        <article class="card">
-          <div class="card-content">
-            <div class="media">
-              <div class="media-left">
-                <figure class="image is-48x48">
-                  <img src="https://api.adorable.io/avatars/64/abott@adorable.png"/>
-                </figure>
-              </div>
-              <div class="media-content">
-                <p class="title is-4 has-text-dark has-text-weight-light">{{ post.creator_name }}</p>
-                <p class="subtitle is-6 has-text-grey">{{ creationDate }}</p>
-              </div>
-              <div class="media-right">
-                <button class="button is-small mr1">
-                  <b-icon icon="markdown"></b-icon>
-                </button>
-                <button class="button is-small ml1">
-                  <b-icon icon="dots-vertical"></b-icon>
-                </button>
-              </div>
-            </div>
-
-            <div class="content">
-              <truncate clamp="..." 
-                :length="477" 
-                less="Show less"
-                :text="editPost"
-              ></truncate>
-            </div>
-
-            <b-field label="Comment on post"
-              :type="errors.has('editpost') ? 'is-danger' : ''"
-              :message="errors.has('editpost') ? errors.first('editpost') : ''"
-            >
-              <b-input 
-                name="post"
-                type="textarea" 
-                maxlength="1500" 
-                rows="1"
-                v-model="commentContent"
-                v-validate="'max:1500'"
-              ></b-input>
-            </b-field>
-          </div>
-        </article>
-        <footer class="modal-card-foot">
-          <button class="button is-primary" @click="validateComment">Comment</button>
-        </footer>
-      </b-modal> 
   </article>
 </template>
 
@@ -272,7 +259,6 @@ export default {
       admin: false,
       normalView: true,
       editModalActive: false,
-      commentModalActive: false,
       editPost: this.post.content,
       edited: false,
       locked: false,
@@ -524,12 +510,34 @@ export default {
         this.imageSrc = this.backendUrl + "/" + this.post.image_url;
       }
     },
+    deleteComment(commentId, commentIndex) {
+      axios
+        .delete(this.backendUrl + "/post/comment/" + commentId, {
+          headers: {
+            Authorization: "Bearer " + localStorage.access_token
+          }
+        })
+        .then(response => {
+          if (response.status === 200) {
+            this.comments_info.splice(commentIndex, 1);
+            this.$emit("toastMsg", "Comment deleted!", "is-warning");
+          }
+        })
+        .catch(error => {
+          if (error.response.status === 404) {
+            this.toast("404: Comment not found!", "is-danger");
+          } else if (error.response.status === 403) {
+            this.toast("You do not own this comment...", "is-danger");
+          } else {
+            this.toast("Something went wrong during the process", "is-danger");
+          }
+        });
+    },
     // Short functions
     validateComment() {
       if (this.commentContent !== "") {
         this.commentOnPost();
         this.commentContent = "";
-        this.commentModalActive = false;
       }
     },
     amountOfComments() {
@@ -564,6 +572,9 @@ export default {
     prettifyDate() {
       var prettyDate = moment(this.post.created).format("MMM Do, h:MM A");
       this.creationDate = prettyDate;
+    },
+    focusComment() {
+      this.$refs.commentField.focus();
     }
   }
 };

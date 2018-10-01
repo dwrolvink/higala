@@ -192,7 +192,7 @@ export default {
           } else if (status === 403) {
             this.toast("Method not allowed!", "is-danger");
           } else if (status === 413) {
-            this.toast("File is too large! (Max 10MB)", "is-danger")
+            this.toast("File is too large! (Max 10MB)", "is-danger");
           } else {
             this.toast("Something went wrong during the process", "is-danger");
           }

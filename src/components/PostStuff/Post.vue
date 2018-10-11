@@ -113,8 +113,23 @@
         </div>
       </div> 
 
-      <div v-if="post.comments" class="pr4 pl4 pb3">
+      <div v-if="post.comments.length > 0" class="pr4 pl4">
         <hr/>
+
+        <div v-show="post.comments.length > 5" class="mb3">
+          <div class="level is-mobile">
+            <div class="level-left">
+              <a>
+                View previous comments
+              </a>
+            </div>
+
+            <div class="level-right f6 has-text-grey">
+              1 of {{ post.comments.length }}
+            </div>
+          </div>
+        </div>
+
         <div v-for="(comment, index) in comments_info" :key="comment.id">
           <Comment 
             :comment="comment" 
@@ -122,9 +137,12 @@
             v-on:deleteComment="deleteComment"
           />
         </div>
+
+        <hr/>
+
       </div>
 
-      <div class="pr3 pl3">
+      <div class="pr3 pl3 mt3">
         <div class="columns is-mobile">
           <div class="column is-10">
             <b-field>
@@ -263,7 +281,8 @@ export default {
       edited: false,
       locked: false,
       comments_info: [],
-      commentContent: ""
+      commentContent: "",
+      commentAmount: 5
     };
   },
   components: {
@@ -455,7 +474,7 @@ export default {
         .post(
           this.backendUrl + "/postcomments",
           {
-            comment_ids: this.post.comments.slice(5)
+            comment_ids: this.post.comments.slice(commentAmount, commentAmount + 5)
           },
           {
             headers: {
@@ -465,7 +484,7 @@ export default {
         )
         .then(response => {
           if (response.status === 200) {
-            this.comments_info.push(response.data.comments);
+            this.comments_info.unshift(response.data.comments);
           }
         })
         .catch(error => {
@@ -495,7 +514,7 @@ export default {
           if (response.data.success === true) {
             // Add the comment
             let new_comment = response.data.new_comment;
-            this.amountOfComments = this.amountOfComments + 1;
+            this.comments = this.comments + 1;
             this.comments_info.push(new_comment);
           }
         })
@@ -520,6 +539,7 @@ export default {
         .then(response => {
           if (response.status === 200) {
             this.comments_info.splice(commentIndex, 1);
+            this.comments = this.comments - 1;
             this.$emit("toastMsg", "Comment deleted!", "is-warning");
           }
         })

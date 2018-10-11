@@ -43,9 +43,9 @@
           </a>
 
           <a class="level-item">
-            <button class="button is-small is-info" disabled>
-              <b-icon icon="comment" size="is-small"></b-icon>
-              <span>WIP</span>
+            <button class="button is-small is-info">
+              <b-icon icon="reply-all" size="is-small"></b-icon>
+              <span>{{ amountOfReplies }}</span>
             </button>
           </a>
           <a class="level-item">
@@ -66,6 +66,62 @@
           </a>
         </div>
       </nav>
+
+      <!-- <article class="media">
+        <div class="media-left">
+          <figure class="media-left">
+            <p class="image is-24x24">
+              <img src="@/assets/Avatars/Reply.png">
+            </p>
+          </figure>
+        </div>
+        <div class="media-content">
+          <div class="content f6 has-text-grey">
+            <p>
+              <strong>{{ comment.commenter }}</strong> <small class="ml2">{{ created }}</small>
+              <br>
+              <span class="f6 has-text-grey">
+                Lorem, ipsum dolor sit amet consectetur adipisicing elit. Amet, fugiat?
+              </span>
+            </p>
+          </div>
+
+          <nav class="level is-mobile">
+            <div class="level-left">
+              <a class="level-item">
+                <button :class="['button', 'is-small', liked? 'is-dark': '']">
+                  <b-icon icon="thumb-up" size="is-small"></b-icon>
+                  <span>{{ amountOfLikes }}</span>
+                </button>
+              </a>
+
+              <a class="level-item">
+                <button class="button is-small is-info" disabled>
+                  <b-icon icon="reply" size="is-small"></b-icon>
+                </button>
+              </a>
+              <a class="level-item">
+                <button class="button is-small" @click="toggleView">
+                  <b-icon icon="markdown"></b-icon>
+                </button>
+              </a>
+            </div>
+            <div class="level-right">
+              <a class="level-item" v-show="owner">
+                <b-dropdown>
+                  <button class="button is-small is-rounded" slot="trigger">
+                    <b-icon icon="chevron-down"></b-icon>
+                  </button>
+
+                  <b-dropdown-item @click="deletePrompt">Delete Comment</b-dropdown-item>
+                </b-dropdown>
+              </a>
+            </div>
+          </nav>
+        </div>
+
+      </article> -->
+
     </div>
   </article>
 </template>
@@ -88,6 +144,7 @@ export default {
   data() {
     return {
       amountOfLikes: 0,
+      amountOfReplies: 0,
       liked: false,
       created: "",
       normalView: true,
@@ -96,7 +153,7 @@ export default {
   },
   created() {
     this.prettifyDate();
-    this.checkLikesAmount();
+    this.checkLikesAndRepliesAmount();
     this.checkOwner();
   },
   methods: {
@@ -132,12 +189,12 @@ export default {
       var created = moment(this.comment.created).fromNow();
       this.created = created;
     },
-    checkLikesAmount() {
+    checkLikesAndRepliesAmount() {
       if (this.comment.liked === true) {
         this.liked = true;
       }
-      var likeAmounts = this.comment.likes.length;
-      this.amountOfLikes = likeAmounts;
+      this.amountOfLikes = this.comment.likes.length;
+      this.amountOfReplies = this.comment.replies.length;
     },
     toggleView() {
       this.normalView = !this.normalView;

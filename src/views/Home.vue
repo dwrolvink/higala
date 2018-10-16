@@ -61,8 +61,7 @@ export default {
   data() {
     return {
       posts: [],
-      post_ids: [],
-      ids_ready: false
+      post_ids: []
     };
   },
   computed: {
@@ -89,7 +88,6 @@ export default {
           if (response.status === 200) {
             if (this.post_ids != undefined || this.post_ids.length > 0) {
               this.post_ids = response.data.post_ids;
-              this.ids_ready = true;
             }
           }
         })

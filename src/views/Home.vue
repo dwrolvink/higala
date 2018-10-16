@@ -15,7 +15,7 @@
               />
             </div>
             <div v-if="posts">
-              <transition-group enter-active-class="animated fadeInDown" leave-active-class="animated fadeOutRight">
+              <!-- <transition-group enter-active-class="animated fadeInDown" leave-active-class="animated fadeOutRight"> -->
                 <div v-for="(post, index) in posts" :key="post.id">
                   <Post
                     :post="post"
@@ -24,11 +24,14 @@
                     v-on:toastMsg="toast"
                   />
                 </div>
-              </transition-group>
+              <!-- </transition-group> -->
+              <infinite-loading @infinite="infinitehandler">
+                <span slot="no-more">
+                  There are no more posts to show :(
+                </span>
+              </infinite-loading>
+
             </div>
-            <button class="mt3 button"
-              @click="getPostIds"
-            >Get Posts</button>
           </div>
           <div class="column is-3"></div>
         </div>
@@ -44,6 +47,7 @@ import Currentuser from "@/components/PostStuff/Currentuser";
 import Create from "@/components/PostStuff/Create";
 import Post from "@/components/PostStuff/Post";
 import Saturday from "@/components/Saturday.vue";
+import InfiniteLoading from "vue-infinite-loading";
 
 export default {
   name: "home",
@@ -51,12 +55,14 @@ export default {
     Currentuser,
     Create,
     Post,
-    Saturday
+    Saturday,
+    InfiniteLoading
   },
   data() {
     return {
       posts: [],
-      post_ids: []
+      post_ids: [],
+      ids_ready: false
     };
   },
   computed: {
@@ -64,6 +70,7 @@ export default {
   },
   created() {
     this.checkLogin();
+    this.getPostIds();
   },
   methods: {
     checkLogin() {
@@ -80,34 +87,10 @@ export default {
         })
         .then(response => {
           if (response.status === 200) {
-            if (this.post_ids != undefined || this.post_ids.length != 0) {
+            if (this.post_ids != undefined || this.post_ids.length > 0) {
               this.post_ids = response.data.post_ids;
-              this.getPostsInfo();
+              this.ids_ready = true;
             }
-          }
-        })
-        .catch(error => {
-          if (error.response.status === 500) {
-            this.toast("Something went wrong during the process", "is-danger");
-          }
-        });
-    },
-    getPostsInfo() {
-      axios
-        .post(
-          this.backendUrl + "/feed",
-          {
-            post_ids: this.post_ids
-          },
-          {
-            headers: {
-              Authorization: "Bearer " + localStorage.access_token
-            }
-          }
-        )
-        .then(response => {
-          if (response.status === 200) {
-            this.posts = response.data.posts;
           }
         })
         .catch(error => {
@@ -147,6 +130,39 @@ export default {
             this.toast("You do not own this post...", "is-danger");
           } else {
             this.toast("Something went wrong during the process", "is-danger");
+          }
+        });
+    },
+    infinitehandler($state) {
+      let limit = this.posts.length + 15;
+      axios
+        .post(
+          this.backendUrl + "/feed",
+          {
+            post_ids: this.post_ids.slice(this.posts.length, limit)
+          },
+          {
+            headers: {
+              Authorization: "Bearer " + localStorage.access_token
+            }
+          }
+        )
+        .then(response => {
+          if (response.status === 200) {
+            this.posts = this.posts.concat(response.data.posts);
+            setTimeout(() => {
+              $state.loaded();
+            }, 3000);
+
+            if (this.posts.length === this.post_ids.length) {
+              $state.complete();
+            }
+          }
+        })
+        .catch(error => {
+          if (error.response.status === 500) {
+            this.toast("Something went wrong during the process", "is-danger");
+            $state.complete();
           }
         });
     }

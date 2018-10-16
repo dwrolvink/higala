@@ -474,7 +474,10 @@ export default {
         .post(
           this.backendUrl + "/postcomments",
           {
-            comment_ids: this.post.comments.slice(this.commentAmount, this.commentAmount + 5)
+            comment_ids: this.post.comments.slice(
+              this.commentAmount,
+              this.commentAmount + 5
+            )
           },
           {
             headers: {
@@ -487,7 +490,7 @@ export default {
             let comments = response.data.comments;
             var i;
             for (i = 0; i < comments.length; i++) {
-              this.comments_info.unshift(comments[i])
+              this.comments_info.unshift(comments[i]);
             }
           }
         })

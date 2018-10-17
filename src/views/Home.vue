@@ -133,36 +133,42 @@ export default {
     },
     infinitehandler($state) {
       let limit = this.posts.length + 15;
-      axios
-        .post(
-          this.backendUrl + "/feed",
-          {
-            post_ids: this.post_ids.slice(this.posts.length, limit)
-          },
-          {
-            headers: {
-              Authorization: "Bearer " + localStorage.access_token
-            }
-          }
-        )
-        .then(response => {
-          if (response.status === 200) {
-            this.posts = this.posts.concat(response.data.posts);
-            setTimeout(() => {
-              $state.loaded();
-            }, 3000);
 
-            if (this.posts.length === this.post_ids.length) {
+      setTimeout(() => {
+        axios
+          .post(
+            this.backendUrl + "/feed",
+            {
+              post_ids: this.post_ids.slice(this.posts.length, limit)
+            },
+            {
+              headers: {
+                Authorization: "Bearer " + localStorage.access_token
+              }
+            }
+          )
+          .then(response => {
+            if (response.status === 200) {
+              this.posts = this.posts.concat(response.data.posts);
+              setTimeout(() => {
+                $state.loaded();
+              }, 1000);
+
+              if (this.posts.length === this.post_ids.length) {
+                $state.complete();
+              }
+            }
+          })
+          .catch(error => {
+            if (error.response.status === 500) {
+              this.toast(
+                "Something went wrong during the process",
+                "is-danger"
+              );
               $state.complete();
             }
-          }
-        })
-        .catch(error => {
-          if (error.response.status === 500) {
-            this.toast("Something went wrong during the process", "is-danger");
-            $state.complete();
-          }
-        });
+          });
+      }, 2000);
     }
   }
 };

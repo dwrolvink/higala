@@ -46,7 +46,10 @@
     </div>
     <footer class="card-footer">
         <a class="card-footer-item">
-          <button class="button is-danger is-fullwidth">
+          <button 
+            class="button is-danger is-fullwidth"
+            @click="goToProfile"
+          >
             Profile
           </button>
           <b-tooltip
@@ -70,7 +73,6 @@
 </template>
 
 <script>
-import axios from "axios";
 import moment from "moment";
 import { mapState } from "vuex";
 
@@ -99,47 +101,11 @@ export default {
       }
     },
     getUserInfo() {
-      if (localStorage.currentuser == null) {
-        axios
-          .get(this.backendUrl + "/currentuser", {
-            headers: {
-              Authorization: "Bearer " + localStorage.access_token
-            }
-          })
-          .then(response => {
-            // Save information to local storage
-            if (response.status === 200) {
-              this.currentuser = response.data;
-              localStorage.setItem(
-                "currentuser",
-                JSON.stringify({
-                  id: response.data.id,
-                  bio: response.data.bio,
-                  email: response.data.email,
-                  first_name: response.data.first_name,
-                  last_name: response.data.last_name,
-                  username: response.data.username,
-                  roles: response.data.roles,
-                  joined_date: response.data.joined_date
-                })
-              );
-            }
-          })
-          .catch(error => {
-            if (error.response.status === 500) {
-              this.$router.push("/login");
-            }
-          });
-      } else {
-        var currentuser = JSON.parse(localStorage.getItem("currentuser"));
-        this.currentuser = currentuser;
-      }
+      this.currentuser = JSON.parse(localStorage.getItem("currentuser"));
     },
     checkRole() {
-      if (
-        this.currentuser.roles != null &&
-        this.currentuser.roles.includes(1)
-      ) {
+      let currentuser = this.currentuser;
+      if (currentuser.roles != null && currentuser.roles.includes(1)) {
         this.admin = true;
       }
     },
@@ -173,6 +139,9 @@ export default {
         cancelText: "Nah",
         onConfirm: () => this.logout()
       });
+    },
+    goToProfile() {
+      this.$router.push({ name: "profile", query: { showPosts: true } });
     }
   }
 };

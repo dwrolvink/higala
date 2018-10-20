@@ -33,7 +33,9 @@
 
             </div>
           </div>
-          <div class="column is-3"></div>
+          <div class="column is-3">
+            <MessageBoard/>
+          </div>
         </div>
       </div>
     </div>
@@ -46,7 +48,8 @@ import { mapState } from "vuex";
 import Currentuser from "@/components/PostStuff/Currentuser";
 import Create from "@/components/PostStuff/Create";
 import Post from "@/components/PostStuff/Post";
-import Saturday from "@/components/Saturday.vue";
+import Saturday from "@/components/Saturday";
+import MessageBoard from "@/components/MessageBoard";
 import InfiniteLoading from "vue-infinite-loading";
 
 export default {
@@ -56,6 +59,7 @@ export default {
     Create,
     Post,
     Saturday,
+    MessageBoard,
     InfiniteLoading
   },
   data() {

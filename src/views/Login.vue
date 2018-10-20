@@ -91,7 +91,21 @@ export default {
         .then(response => {
           if (response.status === 200) {
             // Store the access token
+            let user = response.data.currentuser;
             localStorage.setItem("access_token", response.data.access_token);
+            localStorage.setItem(
+              "currentuser",
+              JSON.stringify({
+                id: user.id,
+                bio: user.bio,
+                email: user.email,
+                first_name: user.first_name,
+                last_name: user.last_name,
+                username: user.username,
+                roles: user.roles,
+                joined_date: user.joined_date
+              })
+            );
             // Once saved, get the current user's information
             this.goHome();
           }

@@ -116,16 +116,16 @@
       <div v-if="post.comments.length > 0" class="pr4 pl4">
         <hr/>
 
-        <div v-show="post.comments.length > 5" class="mb3">
+        <div v-show="viewMoreComments" class="mb3">
           <div class="level is-mobile">
             <div class="level-left">
-              <a>
+              <a @click="getMoreComments">
                 View previous comments
               </a>
             </div>
 
             <div class="level-right f6 has-text-grey">
-              1 of {{ post.comments.length }}
+              {{ comments_info.length }} of {{ post.comments.length }}
             </div>
           </div>
         </div>
@@ -258,6 +258,7 @@ import truncate from "vue-truncate-collapsed";
 import axios from "axios";
 import { mapState } from "vuex";
 import Comment from "@/components/PostStuff/CommentReply/Comment";
+import PostModal from "@/components/Modals/PostModal";
 
 export default {
   name: "Post",
@@ -282,12 +283,14 @@ export default {
       locked: false,
       comments_info: [],
       commentContent: "",
-      commentAmount: 5
+      commentAmount: 5,
+      viewMoreComments: false
     };
   },
   components: {
     truncate,
-    Comment
+    Comment,
+    PostModal
   },
   created() {
     this.amountOfKeks();
@@ -301,10 +304,10 @@ export default {
   methods: {
     checkOwner() {
       // Get current user
-      var currentuser = JSON.parse(localStorage.getItem("currentuser"));
+      let currentuser = JSON.parse(localStorage.getItem("currentuser"));
       if (this.post.creator_name === currentuser.username) {
         this.owner = true;
-      } else if (currentuser.roles[0] === 1) {
+      } else if (currentuser.roles != null && currentuser.roles[0] === 1) {
         // This is a client side validation,
         // There's a server side validation too.
         this.admin = true;
@@ -467,42 +470,55 @@ export default {
         });
     },
     getInitialComments() {
-      this.comments_info = this.post.initial_comments;
+      this.comments_info = this.post.initial_comments.reverse();
     },
     getMoreComments() {
-      axios
-        .post(
-          this.backendUrl + "/postcomments",
-          {
-            comment_ids: this.post.comments.slice(
-              this.commentAmount,
-              this.commentAmount + 5
-            )
-          },
-          {
-            headers: {
-              Authorization: "Bearer " + localStorage.access_token
-            }
-          }
-        )
-        .then(response => {
-          if (response.status === 200) {
-            let comments = response.data.comments;
-            var i;
-            for (i = 0; i < comments.length; i++) {
-              this.comments_info.unshift(comments[i]);
-            }
-          }
-        })
-        .catch(error => {
-          if (error.response.status === 500) {
-            this.$emit(
-              "toastMsg",
-              "Something went wrong during the process",
-              "is-danger"
-            );
-          }
+      if (this.post.comments.length !== this.comments_info.length) {
+        let sortedCommentIds = this.post.comments.sort((a, b) => {
+          return b - a;
         });
+        axios
+          .post(
+            this.backendUrl + "/postcomments",
+            {
+              comment_ids: sortedCommentIds.slice(
+                this.commentAmount,
+                this.commentAmount + 5
+              )
+            },
+            {
+              headers: {
+                Authorization: "Bearer " + localStorage.access_token
+              }
+            }
+          )
+          .then(response => {
+            if (response.status === 200) {
+              let comments = response.data.comments;
+              for (var i = 0; i < comments.length; i++) {
+                this.comments_info.unshift(comments[i]);
+              }
+              this.commentAmount =
+                this.commentAmount + response.data.comments.length;
+            }
+          })
+          .catch(error => {
+            if (error.response.status === 500) {
+              this.$emit(
+                "toastMsg",
+                "Something went wrong during the process",
+                "is-danger"
+              );
+            }
+          })
+          .then(() => {
+            if (this.post.comments.length === this.comments_info.length) {
+              this.viewMoreComments = false;
+            }
+          });
+      } else {
+        this.viewMoreComments = false;
+      }
     },
     commentOnPost() {
       axios
@@ -565,12 +581,15 @@ export default {
       if (this.commentContent !== "") {
         this.commentOnPost();
         this.commentContent = "";
+      } else {
+        this.$refs.commentField.focus();
       }
     },
     amountOfComments() {
       this.comments = this.post.comments.length;
       if (this.post.comments.length > 0) {
         this.getInitialComments();
+        if (this.post.comments.length > 5) this.viewMoreComments = true;
       }
     },
     deletePost() {

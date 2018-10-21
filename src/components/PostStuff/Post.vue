@@ -616,7 +616,7 @@ export default {
       this.keks = this.post.likes.length;
     },
     prettifyDate() {
-      var prettyDate = moment(this.post.created).format("MMM Do, h:MM A");
+      let prettyDate = moment(this.post.created).format("MMM Do, h:MM A");
       this.creationDate = prettyDate;
     },
     focusComment() {

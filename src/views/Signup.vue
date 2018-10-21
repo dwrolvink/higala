@@ -290,7 +290,7 @@ export default {
           }
         })
         .catch(error => {
-          var reason = error.response.data.reason;
+          let reason = error.response.data.reason;
           if (reason === "email") {
             this.toast("Email is already being used!", "is-danger");
           } else if (reason === "username") {

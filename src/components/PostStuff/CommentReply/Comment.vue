@@ -43,7 +43,7 @@
           </a>
 
           <a class="level-item">
-            <button class="button is-small is-info">
+            <button class="button is-small is-info" @click="isCardModalActive = true">
               <b-icon icon="reply-all" size="is-small"></b-icon>
               <span>{{ amountOfReplies }}</span>
             </button>
@@ -67,62 +67,22 @@
         </div>
       </nav>
 
-      <!-- <article class="media">
-        <div class="media-left">
-          <figure class="media-left">
-            <p class="image is-24x24">
-              <img src="@/assets/Avatars/Reply.png">
-            </p>
-          </figure>
+      <div v-if="comment.replies">
+        <div v-for="(reply, index) in reply_info" :key="reply.id">
+          <Reply 
+            :reply="reply"
+            :index="index"
+          />
         </div>
-        <div class="media-content">
-          <div class="content f6 has-text-grey">
-            <p>
-              <strong>{{ comment.commenter }}</strong> <small class="ml2">{{ created }}</small>
-              <br>
-              <span class="f6 has-text-grey">
-                Lorem, ipsum dolor sit amet consectetur adipisicing elit. Amet, fugiat?
-              </span>
-            </p>
-          </div>
-
-          <nav class="level is-mobile">
-            <div class="level-left">
-              <a class="level-item">
-                <button :class="['button', 'is-small', liked? 'is-dark': '']">
-                  <b-icon icon="thumb-up" size="is-small"></b-icon>
-                  <span>{{ amountOfLikes }}</span>
-                </button>
-              </a>
-
-              <a class="level-item">
-                <button class="button is-small is-info" disabled>
-                  <b-icon icon="reply" size="is-small"></b-icon>
-                </button>
-              </a>
-              <a class="level-item">
-                <button class="button is-small" @click="toggleView">
-                  <b-icon icon="markdown"></b-icon>
-                </button>
-              </a>
-            </div>
-            <div class="level-right">
-              <a class="level-item" v-show="owner">
-                <b-dropdown>
-                  <button class="button is-small is-rounded" slot="trigger">
-                    <b-icon icon="chevron-down"></b-icon>
-                  </button>
-
-                  <b-dropdown-item @click="deletePrompt">Delete Comment</b-dropdown-item>
-                </b-dropdown>
-              </a>
-            </div>
-          </nav>
-        </div>
-
-      </article> -->
+      </div>
 
     </div>
+
+    <!-- Modals -->
+    <b-modal :active.sync="isCardModalActive" :width="640" scroll="keep">
+        <div class="card">
+        </div>
+    </b-modal>
   </article>
 </template>
 
@@ -131,12 +91,14 @@ import truncate from "vue-truncate-collapsed";
 import moment from "moment";
 import { mapState } from "vuex";
 import axios from "axios";
+import Reply from "@/components/PostStuff/CommentReply/Reply";
 
 export default {
   name: "Comment",
   props: ["comment", "index"],
   components: {
-    truncate
+    truncate,
+    Reply
   },
   computed: {
     ...mapState(["backendUrl"])
@@ -148,13 +110,17 @@ export default {
       liked: false,
       created: "",
       normalView: true,
-      owner: false
+      owner: false,
+      reply_info: [],
+      replyContent: "",
+      isCardModalActive: false
     };
   },
   created() {
     this.prettifyDate();
     this.checkLikesAndRepliesAmount();
     this.checkOwner();
+    this.getLatestReply();
   },
   methods: {
     likeComment() {
@@ -185,8 +151,40 @@ export default {
           }
         });
     },
+    replyOnComment() {
+      axios
+        .post(
+          this.backendUrl + "/comment/" + this.comment.id + "/replies",
+          {
+            content: this.replyContent
+          },
+          {
+            headers: {
+              Authorization: "Bearer " + localStorage.access_token
+            }
+          }
+        )
+        .then(response => {
+          if (response.status === 201) {
+            // Add the comment
+            let new_comment = response.data.new_comment;
+            this.comments = this.comments + 1;
+            this.comments_info.push(new_comment);
+          }
+        })
+        .catch(error => {
+          if (error.response.status === 403) {
+            this.$emit("toastMsg", "Post is locked!", "is-danger");
+          }
+        });
+    },
+    getLatestReply() {
+      if (this.comment.latest_reply > 0) {
+        this.reply_info = this.comment.latest_reply;
+      }
+    },
     prettifyDate() {
-      var created = moment(this.comment.created).fromNow();
+      let created = moment(this.comment.created).fromNow();
       this.created = created;
     },
     checkLikesAndRepliesAmount() {
@@ -200,7 +198,7 @@ export default {
       this.normalView = !this.normalView;
     },
     checkOwner() {
-      var currentUser = JSON.parse(localStorage.getItem("currentuser"));
+      let currentUser = JSON.parse(localStorage.getItem("currentuser"));
       if (this.comment.commenter === currentUser.username) {
         this.owner = true;
       }

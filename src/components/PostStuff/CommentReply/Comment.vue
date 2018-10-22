@@ -43,7 +43,7 @@
           </a>
 
           <a class="level-item">
-            <button class="button is-small is-info" @click="isCardModalActive = true">
+            <button class="button is-small is-info" @click="isReplyModalActive = true">
               <b-icon icon="reply-all" size="is-small"></b-icon>
               <span>{{ amountOfReplies }}</span>
             </button>
@@ -78,11 +78,15 @@
 
     </div>
 
-    <!-- Modals -->
-    <b-modal :active.sync="isCardModalActive" :width="640" scroll="keep">
-        <div class="card">
-        </div>
-    </b-modal>
+    <ReplyModal
+      :comment="this.comment"
+      :isReplyModalActive="isReplyModalActive"
+      :amountOfReplies="amountOfReplies"
+      :amountOfLikes="amountOfLikes"
+      :liked="liked"
+      v-on:likeComment="likeComment"
+    />
+
   </article>
 </template>
 
@@ -92,13 +96,15 @@ import moment from "moment";
 import { mapState } from "vuex";
 import axios from "axios";
 import Reply from "@/components/PostStuff/CommentReply/Reply";
+import ReplyModal from "@/components/Modals/ReplyModal";
 
 export default {
   name: "Comment",
   props: ["comment", "index"],
   components: {
     truncate,
-    Reply
+    Reply,
+    ReplyModal
   },
   computed: {
     ...mapState(["backendUrl"])
@@ -113,7 +119,8 @@ export default {
       owner: false,
       reply_info: [],
       replyContent: "",
-      isCardModalActive: false
+      isReplyModalActive: false,
+      replyView: true
     };
   },
   created() {
@@ -196,6 +203,9 @@ export default {
     },
     toggleView() {
       this.normalView = !this.normalView;
+    },
+    toggleViewReply() {
+      this.replyView = !this.replyView;
     },
     checkOwner() {
       let currentUser = JSON.parse(localStorage.getItem("currentuser"));

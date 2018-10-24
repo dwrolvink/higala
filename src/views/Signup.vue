@@ -291,14 +291,36 @@ export default {
         })
         .catch(error => {
           let reason = error.response.data.reason;
-          if (reason === "email") {
-            this.toast("Email is already being used!", "is-danger");
-          } else if (reason === "username") {
-            this.toast("Username has already been taken!", "is-danger");
-          } else if (reason === "key") {
-            this.toast("Wrong entry key!", "is-danger");
-          } else {
-            this.toast("Uh oh! Something went wrong!", "is-danger");
+          switch (reason) {
+            case "email":
+              this.toast("Email is already being used!", "is-danger");
+              break;
+            case "username":
+              this.toast("Username has already been taken!", "is-danger");
+              break;
+            case "usernameLength":
+              this.toast("Username length is invalid!", "is-danger");
+              break;
+            case "usernameNotAlphaNumeric":
+              this.toast("Username must be alpha numeric only!", "is-danger");
+              break;
+            case "nonAlphaName":
+              this.toast(
+                "Full or Last name are not alphabetical!",
+                "is-danger"
+              );
+              break;
+            case "nameLength":
+              this.toast("Full or Last name length is invalid!", "is-danger");
+              break;
+            case "key":
+              this.toast("Entry key provided is invalid!", "is-danger");
+              break;
+            default:
+              this.toast(
+                "Something went wrong during the process!",
+                "is-danger"
+              );
           }
         });
     },

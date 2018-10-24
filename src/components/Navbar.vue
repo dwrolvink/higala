@@ -35,6 +35,8 @@
 </template>
 
 <script>
+import { mapState, mapMutations } from "vuex";
+
 export default {
   name: "Navbar",
   data() {
@@ -43,7 +45,10 @@ export default {
       menuActive: false
     };
   },
-  beforeMount() {
+  computed: {
+    ...mapState(["loggedIn"])
+  },
+  created() {
     this.checkLogin();
   },
   methods: {
@@ -56,9 +61,7 @@ export default {
     },
     checkLogin() {
       if (localStorage.access_token == null) {
-        this.loggedIn = false;
-      } else {
-        this.loggedIn = true;
+        console.log(this.loggedIn)
       }
     },
     goHome() {

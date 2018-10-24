@@ -9,8 +9,8 @@ export default new Vuex.Store({
     isReplyModalActive: false
   },
   mutations: {
-    toggleReplyModal(state) {
-      state.isReplyModalActive = !state.isReplyModalActive;
+    showReplyModal(state) {
+      state.isReplyModalActive = true;
     }
   },
   actions: {}

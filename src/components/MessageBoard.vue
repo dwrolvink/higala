@@ -10,7 +10,9 @@
     <div class="card-content">
       <div class="content">
         Konishi is currently in <span class="has-text-danger">testing phase and is really barebones</span>, if you encounter any bugs
-        feel free to contact Zeth (AKA Linus Stallman on FB).
+        and issues, please create an issue on Github 
+        <a href="https://github.com/konishi-project/higala" target="_blank">Frontend</a> or
+        <a href="https://github.com/konishi-project/zimmerman" target="_blank">Backend</a>
 
         <ul>
           <li>Please remain civil and keep it SFW.</li>

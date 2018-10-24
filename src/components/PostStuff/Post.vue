@@ -142,7 +142,7 @@
 
       </div>
 
-      <div class="pr3 pl3 mt3">
+      <div v-show="!locked" class="pr3 pl3 mt3">
         <div class="columns is-mobile">
           <div class="column is-10">
             <b-field>
@@ -258,7 +258,6 @@ import truncate from "vue-truncate-collapsed";
 import axios from "axios";
 import { mapState } from "vuex";
 import Comment from "@/components/PostStuff/CommentReply/Comment";
-import PostModal from "@/components/Modals/PostModal";
 
 export default {
   name: "Post",
@@ -289,8 +288,7 @@ export default {
   },
   components: {
     truncate,
-    Comment,
-    PostModal
+    Comment
   },
   created() {
     this.amountOfKeks();
@@ -534,7 +532,7 @@ export default {
           }
         )
         .then(response => {
-          if (response.data.success === true) {
+          if (response.status === 200) {
             // Add the comment
             let new_comment = response.data.new_comment;
             this.comments = this.comments + 1;

@@ -72,15 +72,9 @@ export default {
     ...mapState(["backendUrl"])
   },
   created() {
-    this.checkLogin();
     this.getPostIds();
   },
   methods: {
-    checkLogin() {
-      if (localStorage.access_token == null) {
-        this.$router.push("/login");
-      }
-    },
     getPostIds() {
       axios
         .get(this.backendUrl + "/feed", {
@@ -96,7 +90,9 @@ export default {
           }
         })
         .catch(error => {
-          if (error.response.status === 500) {
+          if (error.response.status === 500 && localStorage.access_token === null) {
+            this.$router.push("/login");
+          } else {
             this.toast("Something went wrong during the process", "is-danger");
           }
         });

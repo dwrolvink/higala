@@ -117,7 +117,7 @@ export default {
       });
     },
     prettyDate() {
-      var joinDate = moment(this.currentuser.joined_date).format(
+      let joinDate = moment(this.currentuser.joined_date).format(
         "MMM Do, YYYY"
       );
       this.joined = joinDate;
@@ -141,7 +141,7 @@ export default {
       });
     },
     goToProfile() {
-      this.$router.push({ name: "profile", query: { showPosts: true } });
+      this.$router.push({ name: "profile", query: { showPosts: false } });
     }
   }
 };

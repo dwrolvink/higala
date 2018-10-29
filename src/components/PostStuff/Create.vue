@@ -119,7 +119,7 @@ export default {
       if (this.postContent != "" || this.image_id != "") {
         axios
           .post(
-            this.backendUrl + "/posts",
+            this.backendUrl + "/createpost",
             {
               content: this.postContent,
               image_id: this.image_id

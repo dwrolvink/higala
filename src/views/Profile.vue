@@ -162,7 +162,7 @@ export default {
             this.amount.likes = response.data.user.post_likes.length;
             this.amount.rating = 104;
             if (userData.owner) {
-              this.owner = userData.owner
+              this.owner = userData.owner;
             }
           }
         })
@@ -180,9 +180,7 @@ export default {
       });
     },
     prettifyDate() {
-      let joinDate = moment(this.userInfo.joined_date).format(
-        "MMM Do, YYYY"
-      );
+      let joinDate = moment(this.userInfo.joined_date).format("MMM Do, YYYY");
       this.joinedDate = joinDate;
     }
   }

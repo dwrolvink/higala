@@ -33,6 +33,7 @@
 
             </div>
           </div>
+
           <div class="column is-3">
             <MessageBoard/>
           </div>
@@ -65,13 +66,15 @@ export default {
   data() {
     return {
       posts: [],
-      post_ids: []
+      post_ids: [],
+      ready: false
     };
   },
   computed: {
     ...mapState(["backendUrl"])
   },
   created() {
+    this.checkLogin();
     this.getPostIds();
   },
   methods: {
@@ -90,12 +93,22 @@ export default {
           }
         })
         .catch(error => {
-          if (error.response.status === 500 && localStorage.access_token === null) {
+          if (
+            error.response.status === 500 &&
+            localStorage.access_token === null
+          ) {
             this.$router.push("/login");
           } else {
             this.toast("Something went wrong during the process", "is-danger");
           }
         });
+    },
+    checkLogin() {
+      if (localStorage.getItem("access_token") === null) {
+        this.$router.push("/login");
+      } else {
+        this.ready = true;
+      }
     },
     toast(msg, type) {
       this.$toast.open({

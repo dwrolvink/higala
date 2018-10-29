@@ -89,17 +89,11 @@ export default {
     ...mapState(["backendUrl"])
   },
   created() {
-    this.checkLogin();
     this.getUserInfo();
     this.checkRole();
     this.prettyDate();
   },
   methods: {
-    checkLogin() {
-      if (localStorage.access_token == null) {
-        this.$router.push("/login");
-      }
-    },
     getUserInfo() {
       this.currentuser = JSON.parse(localStorage.getItem("currentuser"));
     },

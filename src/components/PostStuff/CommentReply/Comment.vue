@@ -43,7 +43,11 @@
           </a>
 
           <a class="level-item">
-            <button class="button is-small is-info" @click="isReplyModalActive = true">
+            <button 
+              class="button is-small is-info"
+              @click="isReplyModalActive = true"
+              :disabled="postLock"
+            >
               <b-icon icon="reply-all" size="is-small"></b-icon>
               <span>{{ amountOfReplies }}</span>
             </button>
@@ -174,7 +178,7 @@ import Reply from "@/components/PostStuff/CommentReply/Reply";
 
 export default {
   name: "Comment",
-  props: ["comment", "index"],
+  props: ["comment", "index", "postLock"],
   components: {
     truncate,
     Reply
@@ -256,16 +260,20 @@ export default {
           if (error.response.status === 403) {
             this.$emit("toastMsg", "Post is locked!", "is-danger");
           } else {
-            this.$emit("toastMsg", "Something went wrong during the process!", "is-danger");
+            this.$emit(
+              "toastMsg",
+              "Something went wrong during the process!",
+              "is-danger"
+            );
           }
         });
     },
     validateReply() {
       if (this.replyContent !== "") {
         this.replyOnComment();
-        this.replyContent = ""
+        this.replyContent = "";
       } else {
-        this.$refs.replyField.focus()
+        this.$refs.replyField.focus();
       }
     },
     getLatestReply() {

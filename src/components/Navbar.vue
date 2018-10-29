@@ -61,7 +61,7 @@ export default {
     },
     checkLogin() {
       if (localStorage.access_token == null) {
-        console.log(this.loggedIn)
+        console.log(this.loggedIn);
       }
     },
     goHome() {

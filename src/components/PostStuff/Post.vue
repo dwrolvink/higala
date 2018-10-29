@@ -50,7 +50,7 @@
       </div>
 
       <div class="content">
-        <div v-if="normalView">
+        <div v-if="!viewMode.markdown">
           <truncate clamp="..." 
             :length="477" 
             less="Show less"
@@ -135,6 +135,7 @@
             :comment="comment" 
             :index="index"
             v-on:deleteComment="deleteComment"
+            :postLock="locked"
           />
         </div>
 
@@ -160,7 +161,7 @@
           </div>
 
           <div class="column is-2">
-            <button class="button is-fullwidth is-small is-rounded is-info" disabled>
+            <button class="button is-fullwidth is-small is-info" disabled>
               <b-icon
                 icon="image"
               >
@@ -168,7 +169,7 @@
             </button>
 
             <button 
-              class="button is-fullwidth mt2 is-small is-rounded is-success"
+              class="button is-fullwidth mt2 is-small is-success"
               @click="validateComment"
             >
               <b-icon
@@ -258,6 +259,7 @@ import truncate from "vue-truncate-collapsed";
 import axios from "axios";
 import { mapState } from "vuex";
 import Comment from "@/components/PostStuff/CommentReply/Comment";
+import hljs from "highlight.js";
 
 export default {
   name: "Post",
@@ -275,7 +277,10 @@ export default {
       imageSrc: "",
       owner: false,
       admin: false,
-      normalView: true,
+      viewMode: {
+        markdown: false,
+        markdownContent: ""
+      },
       editModalActive: false,
       editPost: this.post.content,
       edited: false,
@@ -594,7 +599,13 @@ export default {
       this.$emit("deletePost", this.post.id, this.index);
     },
     toggleView() {
-      this.normalView = !this.normalView;
+      if (!viewMode.markdown) {
+        this.viewMode.markdown = true;
+        this.viewMode.markdownContent = hljs.highlightBlock(this.post.content);
+      } else {
+        this.viewMode.markdown = false;
+
+      }
     },
     checkEdit() {
       if (this.post.edited === true) {

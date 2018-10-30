@@ -35,7 +35,7 @@
 </template>
 
 <script>
-import { mapState, mapMutations } from "vuex";
+import { mapState } from "vuex";
 
 export default {
   name: "Navbar",
@@ -48,9 +48,6 @@ export default {
   computed: {
     ...mapState(["loggedIn"])
   },
-  created() {
-    this.checkLogin();
-  },
   methods: {
     showMenu() {
       this.burgerActive = !this.burgerActive;
@@ -58,11 +55,6 @@ export default {
     },
     contribute() {
       this.$router.push("/contribute");
-    },
-    checkLogin() {
-      if (localStorage.access_token == null) {
-        console.log(this.loggedIn);
-      }
     },
     goHome() {
       this.$router.push("/");

@@ -50,7 +50,7 @@
       </div>
 
       <div class="content">
-        <div v-if="!viewMode.markdown">
+        <div v-if="normalView">
           <truncate clamp="..." 
             :length="477" 
             less="Show less"
@@ -69,7 +69,7 @@
       <div v-if="post.image_file">
         <div class="card-image" @click="isImageModalActive = true">
           <figure class="image">
-            <img :src="imageSrc" alt="Placeholder image">
+            <img :src="imageSrc" alt="Post image">
           </figure>
         </div>
       </div>
@@ -78,11 +78,11 @@
 
         <div class="level is-mobile">
           <div class="level-left">
-            <button :class="['button', kekGiven? 'is-dark' : '']" 
-              v-on="{click: kekGiven? unlikePost : likePost}"
+            <button :class="['button', keks.kekGiven ? 'is-dark' : '']" 
+              v-on="{click: keks.kekGiven ? unlikePost : likePost}"
             >
               <b-icon icon="thumb-up" size="is-small"></b-icon>
-              <span class="ml1">{{ keks }}</span>
+              <span class="ml1">{{ keks.amountOfKeks }}</span>
             </button>
 
             <button class="ml2 button is-info" 
@@ -259,7 +259,6 @@ import truncate from "vue-truncate-collapsed";
 import axios from "axios";
 import { mapState } from "vuex";
 import Comment from "@/components/PostStuff/CommentReply/Comment";
-import hljs from "highlight.js";
 
 export default {
   name: "Post",
@@ -269,18 +268,17 @@ export default {
   },
   data() {
     return {
-      kekGiven: false,
-      keks: 0,
+      keks: {
+        kekGiven: false,
+        amountOfKeks: 0
+      },
       comments: 0,
       isImageModalActive: false,
       creationDate: "",
       imageSrc: "",
       owner: false,
       admin: false,
-      viewMode: {
-        markdown: false,
-        markdownContent: ""
-      },
+      normalView: true,
       editModalActive: false,
       editPost: this.post.content,
       edited: false,
@@ -312,7 +310,6 @@ export default {
         this.owner = true;
       } else if (currentuser.roles != null && currentuser.roles[0] === 1) {
         // This is a client side validation,
-        // There's a server side validation too.
         this.admin = true;
       }
     },
@@ -325,8 +322,8 @@ export default {
         })
         .then(response => {
           if (response.status === 201) {
-            this.kekGiven = true;
-            this.keks = this.keks + 1;
+            this.keks.kekGiven = true;
+            this.keks.amountOfKeks = this.keks.amountOfKeks + 1;
           }
         })
         .catch(error => {
@@ -348,8 +345,8 @@ export default {
         })
         .then(response => {
           if (response.status === 200) {
-            this.kekGiven = false;
-            this.keks = this.keks - 1;
+            this.keks.kekGiven = false;
+            this.keks.amountOfKeks = this.keks.amountOfKeks - 1;
           }
         })
         .catch(error => {
@@ -599,13 +596,7 @@ export default {
       this.$emit("deletePost", this.post.id, this.index);
     },
     toggleView() {
-      if (!viewMode.markdown) {
-        this.viewMode.markdown = true;
-        this.viewMode.markdownContent = hljs.highlightBlock(this.post.content);
-      } else {
-        this.viewMode.markdown = false;
-
-      }
+      this.normalView = !this.normalView;
     },
     checkEdit() {
       if (this.post.edited === true) {
@@ -620,9 +611,9 @@ export default {
     amountOfKeks() {
       // Check if the user liked the post
       if (this.post.liked === true) {
-        this.kekGiven = true;
+        this.keks.kekGiven = true;
       }
-      this.keks = this.post.likes.length;
+      this.keks.amountOfKeks = this.post.likes.length;
     },
     prettifyDate() {
       let prettyDate = moment(this.post.created).format("MMM Do, h:MM A");

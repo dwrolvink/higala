@@ -98,6 +98,7 @@
 <script>
 import axios from "axios";
 import { mapState } from "vuex";
+
 export default {
   name: "Create",
   data() {
@@ -172,6 +173,7 @@ export default {
       this.uploadingImage = true;
       const formData = new FormData();
       formData.append("image", this.image);
+
       axios
         .post(this.backendUrl + "/imageupload", formData, {
           headers: {

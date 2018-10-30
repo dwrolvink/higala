@@ -165,7 +165,7 @@ export default {
               this.posts = this.posts.concat(response.data.posts);
               setTimeout(() => {
                 $state.loaded();
-              }, 1000);
+              }, 500);
 
               if (this.posts.length === this.post_ids.length) {
                 $state.complete();
@@ -181,7 +181,7 @@ export default {
               $state.complete();
             }
           });
-      }, 2000);
+      }, 500);
     }
   }
 };

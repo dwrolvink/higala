@@ -83,7 +83,9 @@
     </div>
 
     <!-- REPLY MODAL -->
-    <b-modal :active.sync="isReplyModalActive" :width="640" scroll="keep">
+    <b-modal :active.sync="isReplyModalActive" :width="640" scroll="keep"
+      :onCancel="resetReplyModal"
+    >
 
         <div class="card">
 
@@ -249,7 +251,8 @@ export default {
           }
         )
         .then(response => {
-          if (response.status === 201) {
+          console.log("Status " + response.status, "Data " + response.data)
+          if (response.status === 200) {
             // Add the comment
             let new_reply = response.data.newest_reply;
             this.amountOfReplies = this.amountOfReplies + 1;
@@ -317,6 +320,9 @@ export default {
         hasIcon: true,
         onConfirm: () => this.deleteComment()
       });
+    },
+    resetReplyModal() {
+      this.replyContent = this.comment.content;
     }
   }
 };

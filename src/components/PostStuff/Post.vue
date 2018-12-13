@@ -113,7 +113,7 @@
         </div>
       </div> 
 
-      <div v-if="post.comments.length > 0" class="pr4 pl4">
+      <div v-if="this.comments_info.length > 0" class="pr4 pl4">
         <hr/>
 
         <div v-show="viewMoreComments" class="mb3">

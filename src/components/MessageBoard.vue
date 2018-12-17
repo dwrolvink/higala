@@ -10,11 +10,10 @@
     <div class="card-content">
       <div class="content">
       This is a live demo of the dev branch and will be <span class="has-text-danger">restarted at 0:00 UTC+1</span> to pull 
-      new data from github. (Or whenever we feel like it).
+      new data from github. (Or whenever we feel like it).</br>
+      
         Konishi is currently in <span class="has-text-danger">testing phase and is really barebones</span>, if you encounter any bugs
-        and issues, please create an issue on Github 
-        <a href="https://github.com/konishi-project/higala" target="_blank">Frontend</a> or
-        <a href="https://github.com/konishi-project/zimmerman" target="_blank">Backend</a>
+        and issues, please create an issue on <a href="https://github.com/Konishi2" target="_blank">Github</a>. 
 
         <ul>
           <li>Please remain civil and keep it SFW.</li>

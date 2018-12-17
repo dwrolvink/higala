@@ -7,8 +7,8 @@
             <img src="@/assets/Brand.png" alt="Logo">
           </a>
         </router-link>
-        <span 
-          class="navbar-burger burger" 
+        <span
+          class="navbar-burger burger"
           data-target="navbarMenu"
           :class="[burgerActive? 'is-active' : '']"
           @click="showMenu"
@@ -18,16 +18,14 @@
           <span></span>
         </span>
       </div>
-      <div 
-        id="navbarMenu" 
-        class="navbar-menu" 
-        :class="[menuActive? 'is-active' : '']"
+      <div
+        id="navbarMenu"
+        class="navbar-menu"
+        :class="[menuActive? 'is-active menu-is-active' : '']"
         @click="showMenu"
       >
         <div class="navbar-end">
-          <a class="navbar-item is-active" @click="contribute">
-            Contribute
-          </a>
+          <a class="navbar-item is-active" @click="contribute">Contribute</a>
         </div>
       </div>
     </div>
@@ -62,3 +60,20 @@ export default {
   }
 };
 </script>
+
+<style lang="scss" scoped>
+.menu-is-active {
+  animation-name: grow;
+  animation-duration: 0.5s;
+  transform-origin: top;
+}
+
+@keyframes grow {
+  0% {
+    transform: scaleY(0);
+  }
+  100% {
+    transform: scaleY(1);
+  }
+}
+</style>

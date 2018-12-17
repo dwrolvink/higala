@@ -254,9 +254,10 @@ export default {
           console.log("Status " + response.status, "Data " + response.data)
           if (response.status === 200) {
             // Add the comment
-            let new_reply = response.data.newest_reply;
+            let new_reply = response.data.new_reply;
             this.amountOfReplies = this.amountOfReplies + 1;
-            this.reply_info.push(new_reply);
+            this.reply_info.push(new_reply)
+            this.isReplyModalActive = false;
           }
         })
         .catch(error => {

@@ -9,6 +9,8 @@
 
     <div class="card-content">
       <div class="content">
+      <span class="has-text-danger">This is a live demo of the dev branch and will be restarted at UTC+1 to pull 
+      new data from github. (Or whenever we feel like it).</span>
         Konishi is currently in <span class="has-text-danger">testing phase and is really barebones</span>, if you encounter any bugs
         and issues, please create an issue on Github 
         <a href="https://github.com/konishi-project/higala" target="_blank">Frontend</a> or
